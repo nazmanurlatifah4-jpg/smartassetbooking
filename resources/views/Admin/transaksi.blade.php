@@ -45,10 +45,10 @@
 <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
     @php
     $statCards = [
-        ['label'=>'Total','val'=>$stats['total'],'icon'=>'fas fa-list','bg'=>'bg-[#dbeafe]','c'=>'text-[#3b82f6]'],
-        ['label'=>'Menunggu','val'=>$stats['menunggu'],'icon'=>'fas fa-clock','bg'=>'bg-[#fed7aa]','c'=>'text-[#f59e0b]'],
-        ['label'=>'Aktif','val'=>$stats['dipinjam'],'icon'=>'fas fa-hand-holding','bg'=>'bg-[#d1fae5]','c'=>'text-[#10b981]'],
-        ['label'=>'Terlambat','val'=>$stats['terlambat'],'icon'=>'fas fa-exclamation-triangle','bg'=>'bg-[#fecaca]','c'=>'text-[#ef4444]'],
+        ['label'=>'Total','val'=>$stats->total,'icon'=>'fas fa-list','bg'=>'bg-[#dbeafe]','c'=>'text-[#3b82f6]'],
+        ['label'=>'Menunggu','val'=>$stats->menunggu,'icon'=>'fas fa-clock','bg'=>'bg-[#fed7aa]','c'=>'text-[#f59e0b]'],
+        ['label'=>'Aktif','val'=>$stats->dipinjam,'icon'=>'fas fa-hand-holding','bg'=>'bg-[#d1fae5]','c'=>'text-[#10b981]'],
+        ['label'=>'Terlambat','val'=>$stats->terlambat,'icon'=>'fas fa-exclamation-triangle','bg'=>'bg-[#fecaca]','c'=>'text-[#ef4444]'],
     ];
     @endphp
     @foreach($statCards as $sc)

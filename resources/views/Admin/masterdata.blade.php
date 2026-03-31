@@ -66,7 +66,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @php
+                        {{-- @php
                         $users = [
                             ['no'=>1,'name'=>'Budi Santoso','email'=>'budi@email.com','role'=>'Peminjam','jurusan'=>'TKJ'],
                             ['no'=>2,'name'=>'Siti Nurhaliza','email'=>'siti@email.com','role'=>'Peminjam','jurusan'=>'Matematika'],
@@ -74,28 +74,28 @@
                             ['no'=>4,'name'=>'Dewi Lestari','email'=>'dewi@email.com','role'=>'Manajemen','jurusan'=>'-'],
                             ['no'=>5,'name'=>'Eko Prasetyo','email'=>'eko@email.com','role'=>'Peminjam','jurusan'=>'Multimedia'],
                         ];
-                        @endphp
+                        @endphp --}}
                         @foreach($users as $u)
                         <tr class="hover:bg-[#f8fafc] transition-colors">
-                            <td class="p-3 text-xs text-[#475569] border-b border-[#f1f5f9]">{{ $u['no'] }}</td>
-                            <td class="p-3 text-xs text-[#1e293b] border-b border-[#f1f5f9] font-medium">{{ $u['name'] }}</td>
-                            <td class="p-3 text-xs text-[#475569] border-b border-[#f1f5f9] hidden md:table-cell">{{ $u['email'] }}</td>
+                            <td class="p-3 text-xs text-[#475569] border-b border-[#f1f5f9]">{{ $u->id }}</td>
+                            <td class="p-3 text-xs text-[#1e293b] border-b border-[#f1f5f9] font-medium">{{ $u->nama }}</td>
+                            <td class="p-3 text-xs text-[#475569] border-b border-[#f1f5f9] hidden md:table-cell">{{ $u->email }}</td>
                             <td class="p-3 border-b border-[#f1f5f9] hidden sm:table-cell">
-                                <span class="px-2 py-0.5 rounded-full text-xs font-semibold {{ $u['role']==='Manajemen' ? 'bg-[#e9d5ff] text-[#7e22ce]' : 'bg-[#dbeafe] text-[#1d4ed8]' }}">{{ $u['role'] }}</span>
+                                <span class="px-2 py-0.5 rounded-full text-xs font-semibold {{ $u->role==='Manajemen' ? 'bg-[#e9d5ff] text-[#7e22ce]' : 'bg-[#dbeafe] text-[#1d4ed8]' }}">{{ $u->role}}</span>
                             </td>
-                            <td class="p-3 text-xs text-[#475569] border-b border-[#f1f5f9] hidden lg:table-cell">{{ $u['jurusan'] }}</td>
+                            <td class="p-3 text-xs text-[#475569] border-b border-[#f1f5f9] hidden lg:table-cell">{{ $u->jurusan }}</td>
                             <td class="p-3 border-b border-[#f1f5f9]">
                                 <div class="flex gap-1">
-                                    <button onclick="openEditUserModal(this, '{{ $u['id'] ?? $u['no'] }}')"
-    data-name="{{ $u['name'] }}" 
-    data-email="{{ $u['email'] }}" 
-    data-role="{{ $u['role'] }}" 
-    data-jurusan="{{ $u['jurusan'] }}"
+                                    <button onclick="openEditUserModal(this, '{{ $u->id}}')"
+    data-nama="{{ $u->nama }}" 
+    data-email="{{ $u->email }}" 
+    data-role="{{ $u->role }}" 
+    data-jurusan="{{ $u->jurusan}}"
     class="w-7 h-7 rounded-md bg-[#dbeafe] text-[#3b82f6] hover:bg-[#3b82f6] hover:text-white transition-all flex items-center justify-center text-xs">
     <i class="fas fa-edit"></i>
 </button>
 
-<button onclick="openDeleteModal('user', '{{ $u['name'] }}', '{{ $u['id'] ?? $u['no'] }}')"
+<button onclick="openDeleteModal('user', '{{ $u->nama }}', '{{ $u->id }}')"
     class="w-7 h-7 rounded-md bg-[#fee2e2] text-[#ef4444] hover:bg-[#ef4444] hover:text-white transition-all flex items-center justify-center text-xs">
     <i class="fas fa-trash"></i>
 </button>                                </div>
@@ -131,7 +131,7 @@
                 <table class="min-w-full text-sm border-collapse" id="asetTable">
                     <thead class="bg-[#f8fafc]">
                         <tr>
-                            <th class="p-3 text-left text-xs font-semibold text-[#64748b] border-b-2 border-[#e2e8f0]">No</th>
+                            <th class="p-3 text-left text-xs font-semibold text-[#64748b] border-b-2 border-[#e2e8f0]">Id</th>
                             <th class="p-3 text-left text-xs font-semibold text-[#64748b] border-b-2 border-[#e2e8f0]">Nama Aset</th>
                             <th class="p-3 text-left text-xs font-semibold text-[#64748b] border-b-2 border-[#e2e8f0] hidden sm:table-cell">Kategori</th>
                             <th class="p-3 text-left text-xs font-semibold text-[#64748b] border-b-2 border-[#e2e8f0] hidden md:table-cell">Kondisi</th>
@@ -141,54 +141,79 @@
                         </tr>
                     </thead>
                     <tbody>
-                        {{-- @php
-                        $asets = [
-                            ['no'=>1,'nama'=>'Laptop Lenovo ThinkPad','kat'=>'Elektronik','kondisi'=>'Baik','stok'=>5,'status'=>'Tersedia'],
-                            ['no'=>2,'nama'=>'Proyektor Epson EB-X41','kat'=>'Elektronik','kondisi'=>'Baik','stok'=>3,'status'=>'Tersedia'],
-                            ['no'=>3,'nama'=>'Kamera Canon EOS 1500D','kat'=>'Fotografi','kondisi'=>'Baik','stok'=>2,'status'=>'Dipinjam'],
-                            ['no'=>4,'nama'=>'Sound System Simbadda','kat'=>'Audio','kondisi'=>'Cukup','stok'=>1,'status'=>'Tersedia'],
-                            ['no'=>5,'nama'=>'iPad Pro 12.9"','kat'=>'Elektronik','kondisi'=>'Baik','stok'=>4,'status'=>'Tersedia'],
-                            ['no'=>6,'nama'=>'Drone DJI Mini 3','kat'=>'Fotografi','kondisi'=>'Baik','stok'=>1,'status'=>'Maintenance'],
-                        ];
-                        @endphp --}}
-                        @foreach($asets as $a)
-                        @php
-                            $sc = match($a['status']) {
-                                'Tersedia' => 'bg-[#d1fae5] text-[#065f46]',
-                                'Dipinjam' => 'bg-[#fed7aa] text-[#c2410c]',
-                                default => 'bg-[#e0e7ff] text-[#3730a3]'
-                            };
-                        @endphp
-                        <tr class="hover:bg-[#f8fafc] transition-colors">
-                            <td class="p-3 text-xs text-[#475569] border-b border-[#f1f5f9]">{{ $a['no'] }}</td>
-                            <td class="p-3 text-xs text-[#1e293b] border-b border-[#f1f5f9] font-medium">{{ $a['nama_aset'] }}</td>
-                            <td class="p-3 text-xs text-[#475569] border-b border-[#f1f5f9] hidden sm:table-cell">{{ $a['kat'] }}</td>
-                            <td class="p-3 text-xs text-[#475569] border-b border-[#f1f5f9] hidden md:table-cell">{{ $a['kondisi'] }}</td>
-                            <td class="p-3 text-xs text-[#475569] border-b border-[#f1f5f9] hidden md:table-cell">{{ $a['stok'] }}</td>
-                            <td class="p-3 border-b border-[#f1f5f9]">
-                                <span class="px-2 py-0.5 rounded-full text-xs font-semibold {{ $sc }}">{{ $a['status'] }}</span>
-                            </td>
-                            <td class="p-3 border-b border-[#f1f5f9]">
-                                <div class="flex gap-1">
-                                    {{-- Ganti tombol di tabel Aset menjadi seperti ini --}}
-<button onclick="openEditAsetModal(this, '{{ $a['id'] ?? $a['no'] }}')"
-    data-nama_aset="{{ $a['nama_aset'] }}" 
-    data-kat="{{ $a['kat'] }}" 
-    data-kondisi="{{ $a['kondisi'] }}" 
-    data-stok="{{ $a['stok'] }}"
-    class="w-7 h-7 rounded-md bg-[#dbeafe] text-[#3b82f6] hover:bg-[#3b82f6] hover:text-white transition-all flex items-center justify-center text-xs">
-    <i class="fas fa-edit"></i>
-</button>
+    @foreach($asets as $a)
+    @php
+        // Logika warna status
+        $sc = match($a->status) {
+            'Tersedia' => 'bg-[#d1fae5] text-[#065f46]',
+            'Dipinjam' => 'bg-[#fed7aa] text-[#c2410c]',
+            default => 'bg-[#e0e7ff] text-[#3730a3]'
+        };
+    @endphp
+    <tr class="hover:bg-[#f8fafc] transition-colors">
+        {{-- 1. ID --}}
+        <td class="p-3 text-xs text-[#475569] border-b border-[#f1f5f9]">{{ $a->id }}</td>
+        
+        {{-- 2. Nama Aset + FOTO + LOKASI --}}
+        <td class="p-3 border-b border-[#f1f5f9]">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-lg overflow-hidden border border-[#e2e8f0] bg-[#f8fafc] flex-shrink-0 shadow-sm">
+                    @if($a->foto)
+                        <img src="{{ asset('storage/'.$a->foto) }}" class="w-full h-full object-cover">
+                    @else
+                        <div class="w-full h-full flex items-center justify-center text-[#94a3b8]">
+                            <i class="fas fa-box text-[10px]"></i>
+                        </div>
+                    @endif
+                </div>
+                <div>
+                    <div class="text-xs text-[#1e293b] font-medium leading-tight">{{ $a->nama_aset }}</div>
+                    {{-- Lokasi Barang Diselipkan di Sini --}}
+                    <div class="text-[10px] text-[#3b82f6] mt-0.5 font-semibold">
+                        <i class="fas fa-map-marker-alt mr-1"></i>{{ $a->lokasi ?? 'Belum ada lokasi' }}
+                    </div>
+                </div>
+            </div>
+        </td>
 
-<button onclick="openDeleteModal('aset', '{{ $a['nama_aset'] }}', '{{ $a['id'] ?? $a['no'] }}')"
-    class="w-7 h-7 rounded-md bg-[#fee2e2] text-[#ef4444] hover:bg-[#ef4444] hover:text-white transition-all flex items-center justify-center text-xs">
-    <i class="fas fa-trash"></i>
-</button>
-                                </div>
-                            </td>
-                        </tr>
-                        @endforeach
-                    </tbody>
+        {{-- 3. Kategori --}}
+        <td class="p-3 text-xs text-[#475569] border-b border-[#f1f5f9] hidden sm:table-cell">{{ $a->kategori }}</td>
+        
+        {{-- 4. Kondisi --}}
+        <td class="p-3 text-xs text-[#475569] border-b border-[#f1f5f9] hidden md:table-cell">{{ $a->kondisi }}</td>
+        
+        {{-- 5. Stok --}}
+        <td class="p-3 text-xs text-[#475569] border-b border-[#f1f5f9] hidden md:table-cell">{{ $a->stok }}</td>
+        
+        {{-- 6. Status --}}
+        <td class="p-3 border-b border-[#f1f5f9]">
+            <span class="px-2 py-0.5 rounded-full text-xs font-semibold {{ $sc }}">{{ $a->status }}</span>
+        </td>
+
+        {{-- 7. Aksi --}}
+        <td class="p-3 border-b border-[#f1f5f9]">
+            <div class="flex gap-1">
+                <button onclick="openEditAsetModal(this, '{{ $a->id }}')"
+                    data-kode="{{ $a->kode_aset }}"
+                    data-nama_aset="{{ $a->nama_aset }}" 
+                    data-kategori="{{ $a->kategori }}"
+                    data-kondisi="{{ $a->kondisi }}"
+                    data-stok="{{ $a->stok }}"
+                    data-lokasi="{{ $a->lokasi }}"
+                    data-foto="{{ $a->foto }}"
+                    class="w-7 h-7 rounded-md bg-[#dbeafe] text-[#3b82f6] hover:bg-[#3b82f6] hover:text-white transition-all flex items-center justify-center text-xs">
+                    <i class="fas fa-edit"></i>
+                </button>
+
+                <button onclick="openDeleteModal('aset', '{{ $a->nama_aset }}', '{{ $a->id }}')"
+                    class="w-7 h-7 rounded-md bg-[#fee2e2] text-[#ef4444] hover:bg-[#ef4444] hover:text-white transition-all flex items-center justify-center text-xs">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+        </td>
+    </tr>
+    @endforeach
+</tbody>
                 </table>
             </div>
         </div>
@@ -208,7 +233,7 @@
             @csrf
             <div>
                 <label class="field-label">Nama Lengkap</label>
-                <input type="text" name="name" placeholder="Nama lengkap..." class="field-input" required>
+                <input type="text" name="nama" placeholder="Nama lengkap..." class="field-input" required>
             </div>
             <div>
                 <label class="field-label">Email</label>
@@ -255,7 +280,7 @@
             @csrf @method('PUT')
             <div>
                 <label class="field-label">Nama Lengkap</label>
-                <input type="text" id="editUserName" name="name" class="field-input" required>
+                <input type="text" id="editUserName" name="nama" class="field-input" required>
             </div>
             <div>
                 <label class="field-label">Email</label>
@@ -294,97 +319,106 @@
             <h3 class="text-white font-semibold text-base"><i class="fas fa-box-open mr-2"></i>Tambah Aset</h3>
             <button onclick="closeModal('addAsetModal')" class="text-white/80 hover:text-white text-xl">&times;</button>
         </div>
-        <form method="POST" action="{{ route('admin.aset.store') }}" class="p-6 space-y-4">
-            @csrf
-            <div>
-                <label class="field-label">Nama Aset</label>
-                <input type="text" name="nama" placeholder="Nama aset..." class="field-input" required>
-            </div>
-            <div class="grid grid-cols-2 gap-3">
-                <div>
-                    <label class="field-label">Kategori</label>
-                    <select name="kategori" class="field-input">
-                        <option>Elektronik</option>
-                        <option>Fotografi</option>
-                        <option>Audio</option>
-                        <option>Olahraga</option>
-                        <option>Lainnya</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="field-label">Kondisi</label>
-                    <select name="kondisi" class="field-input">
-                        <option>Baik</option>
-                        <option>Cukup</option>
-                        <option>Rusak</option>
-                    </select>
-                </div>
-            </div>
-            <div class="grid grid-cols-2 gap-3">
-                <div>
-                    <label class="field-label">Jumlah Stok</label>
-                    <input type="number" name="stok" min="1" value="1" class="field-input" required>
-                </div>
-                <div>
-                    <label class="field-label">Denda/Hari (Rp)</label>
-                    <input type="number" name="denda_per_hari" placeholder="5000" class="field-input">
-                </div>
-            </div>
-            <div>
-                <label class="field-label">Deskripsi</label>
-                <textarea name="deskripsi" placeholder="Keterangan aset..." rows="2" class="field-input resize-none"></textarea>
-            </div>
-            <div class="flex gap-2 pt-2">
-                <button type="submit" class="flex-1 py-2.5 bg-gradient-to-r from-[#3b82f6] to-[#2563eb] text-white rounded-lg text-sm font-semibold hover:opacity-90 transition-opacity">
-                    <i class="fas fa-save mr-1"></i> Simpan
-                </button>
-                <button type="button" onclick="closeModal('addAsetModal')" class="px-4 py-2.5 bg-[#f1f5f9] text-[#64748b] rounded-lg text-sm font-semibold hover:bg-[#e2e8f0] transition-colors">
-                    Batal
-                </button>
-            </div>
-        </form>
+        <form method="POST" action="{{ route('admin.aset.store') }}" class="p-6 space-y-3" enctype="multipart/form-data">
+    @csrf
+    <div class="grid grid-cols-2 gap-3">
+        <div>
+            <label class="field-label">Kode Aset</label>
+            <input type="text" name="kode_aset" class="field-input" placeholder="KODE-001" required>
+        </div>
+        <div>
+            <label class="field-label">Nama Aset</label>
+            <input type="text" name="nama_aset" class="field-input" required>
+        </div>
+    </div>
+    <div class="grid grid-cols-2 gap-3">
+        <div>
+            <label class="field-label">Kategori</label>
+            <select name="kategori" class="field-input">
+                <option>Elektronik</option><option>Fotografi</option><option>Audio</option>
+            </select>
+        </div>
+        <div>
+            <label class="field-label">Lokasi</label>
+            <input type="text" name="lokasi" class="field-input" placeholder="Lab RPL">
+        </div>
+    </div>
+    <div class="grid grid-cols-2 gap-3">
+        <div>
+            <label class="field-label">Kondisi</label>
+            <select name="kondisi" class="field-input">
+                <option value="Baik">Baik</option>
+                <option value="Rusak Ringan">Rusak Ringan</option>
+                <option value="Rusak Berat">Rusak Berat</option>
+            </select>
+        </div>
+        <div>
+            <label class="field-label">Stok</label>
+            <input type="number" name="stok" min="1" class="field-input" required>
+        </div>
+    </div>
+    <div>
+        <label class="field-label">Foto Barang (Wajib)</label>
+        <input type="file" name="foto" class="field-input text-xs" accept="image/*" required>
+    </div>
+    <button type="submit" class="w-full py-2.5 bg-blue-600 text-white rounded-lg">Simpan Aset</button>
+</form>
     </div>
 </div>
 
 {{-- Edit Aset Modal --}}
 <div id="editAsetModal" class="modal-overlay" onclick="if(event.target===this)closeModal('editAsetModal')">
-    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4">
-        <div class="bg-gradient-to-r from-[#f59e0b] to-[#d97706] px-6 py-4 flex items-center justify-between rounded-t-2xl">
-            <h3 class="text-white font-semibold text-base"><i class="fas fa-edit mr-2"></i>Edit Aset</h3>
-            <button onclick="closeModal('editAsetModal')" class="text-white/80 hover:text-white text-xl">&times;</button>
-        </div>
-        <form method="POST" action="{{ route('admin.aset.update', ':id') }}" class="p-6 space-y-4">
+    <div class="bg-white rounded-2xl w-full max-w-md mx-4">
+        <form method="POST" action="" class="p-6 space-y-3" enctype="multipart/form-data">
             @csrf @method('PUT')
-            <div>
-                <label class="field-label">Nama Aset</label>
-                <input type="text" id="editAsetNama" name="nama" class="field-input" required>
+            
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="field-label">Kode Aset</label>
+                    <input type="text" id="editAsetKode" name="kode_aset" class="field-input bg-gray-100" readonly>
+                </div>
+                <div>
+                    <label class="field-label">Nama Aset</label>
+                    <input type="text" id="editAsetNama" name="nama_aset" class="field-input" required>
+                </div>
             </div>
+
             <div class="grid grid-cols-2 gap-3">
                 <div>
                     <label class="field-label">Kategori</label>
                     <select id="editAsetKat" name="kategori" class="field-input">
-                        <option>Elektronik</option><option>Fotografi</option><option>Audio</option><option>Olahraga</option><option>Lainnya</option>
+                        <option value="Elektronik">Elektronik</option>
+                        <option value="Fotografi">Logistik</option>
+                        <option value="Audio">Lainnya</option>
                     </select>
                 </div>
                 <div>
                     <label class="field-label">Kondisi</label>
                     <select id="editAsetKondisi" name="kondisi" class="field-input">
-                        <option>Baik</option><option>Cukup</option><option>Rusak</option>
+                        <option value="Baik">Baik</option>
+                        <option value="Rusak Ringan">Rusak Ringan</option>
+                        <option value="Rusak Berat">Rusak Berat</option>
                     </select>
                 </div>
             </div>
+
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="field-label">Stok</label>
+                    <input type="number" id="editAsetStok" name="stok" class="field-input">
+                </div>
+                <div>
+                    <label class="field-label">Lokasi</label>
+                    <input type="text" id="editAsetLokasi" name="lokasi" class="field-input">
+                </div>
+            </div>
+
             <div>
-                <label class="field-label">Stok</label>
-                <input type="number" id="editAsetStok" name="stok" min="0" class="field-input">
+                <label class="field-label">Ganti Foto (Opsional)</label>
+                <input type="file" name="foto" class="field-input text-xs" accept="image/*">
             </div>
-            <div class="flex gap-2 pt-2">
-                <button type="submit" class="flex-1 py-2.5 bg-gradient-to-r from-[#f59e0b] to-[#d97706] text-white rounded-lg text-sm font-semibold hover:opacity-90 transition-opacity">
-                    <i class="fas fa-save mr-1"></i> Update
-                </button>
-                <button type="button" onclick="closeModal('editAsetModal')" class="px-4 py-2.5 bg-[#f1f5f9] text-[#64748b] rounded-lg text-sm font-semibold hover:bg-[#e2e8f0] transition-colors">
-                    Batal
-                </button>
-            </div>
+
+            <button type="submit" class="w-full py-2.5 bg-orange-500 text-white rounded-lg">Update Aset</button>
         </form>
     </div>
 </div>
@@ -444,7 +478,7 @@
         form.action = url.replace(':id', id);
 
         // Isi field
-        document.getElementById('editUserName').value = btn.dataset.name;
+        document.getElementById('editUserName').value = btn.dataset.nama;
         document.getElementById('editUserEmail').value = btn.dataset.email;
         document.getElementById('editUserRole').value = btn.dataset.role.toLowerCase();
         document.getElementById('editUserJurusan').value = btn.dataset.jurusan;
@@ -454,22 +488,31 @@
 
     // Logic Edit Aset
     function openEditAsetModal(btn, id) {
-        const modal = document.getElementById('editAsetModal');
-        const form = modal.querySelector('form');
-        
-        // Update URL action form
-        let url = "{{ route('admin.aset.update', ':id') }}";
-        form.action = url.replace(':id', id);
+    const modal = document.getElementById('editAsetModal');
+    const form = modal.querySelector('form');
+    
+    let url = "{{ route('admin.aset.update', ':id') }}";
+    form.action = url.replace(':id', id);
 
-        // Isi field
-        document.getElementById('editAsetNama').value = btn.dataset.nama_aset;
-        document.getElementById('editAsetKat').value = btn.dataset.kat;
-        document.getElementById('editAsetKondisi').value = btn.dataset.kondisi;
-        document.getElementById('editAsetStok').value = btn.dataset.stok;
-        
-        openModal('editAsetModal');
+    document.getElementById('editAsetKode').value = btn.dataset.kode; 
+    document.getElementById('editAsetNama').value = btn.dataset.nama_aset; 
+    document.getElementById('editAsetKat').value = btn.dataset.kategori;
+    document.getElementById('editAsetKondisi').value = btn.dataset.kondisi; 
+    document.getElementById('editAsetStok').value = btn.dataset.stok;
+    document.getElementById('editAsetLokasi').value = btn.dataset.lokasi;
+
+    // LOGIKA FOTO:
+    const preview = document.getElementById('editAsetPreview');
+    if (btn.dataset.foto) {
+        // Arahkan src ke folder storage
+        preview.src = "/storage/" + btn.dataset.foto;
+        preview.classList.remove('hidden');
+    } else {
+        preview.classList.add('hidden');
     }
-
+    
+    openModal('editAsetModal');
+}
     // Logic Delete (Global)
     function openDeleteModal(type, name, id) {
         document.getElementById('deleteTarget').textContent = name;

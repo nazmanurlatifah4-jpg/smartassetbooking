@@ -3,26 +3,52 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
+use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Models\Notifikasi;
 
+/**
+ * @property \Illuminate\Database\Eloquent\Collection|\App\Models\Notifikasi[] $notifikasi
+ */
 class User extends Authenticatable
 {
-    use HasFactory, Notifiable, SoftDeletes;
+    use HasApiTokens, HasFactory, SoftDeletes;
 
+    /**
+     * Kolom yang bisa diisi (Mass Assignment)
+     * Sesuaikan dengan migration 2014_10_12_000000_create_users_table.php
+     */
     protected $fillable = [
-        'nama', 'email', 'password', 'role', 'kelas', 'jurusan'
+        'nama',
+        'email',
+        'password',
+        'role',
+        'kelas',
+        'jurusan',
     ];
 
-    protected $hidden = ['password', 'remember_token'];
-
-    protected $casts = [
-        'password' => 'hashed',
+    protected $hidden = [
+        'password',
+        'remember_token',
     ];
 
-    // Relasi: User bisa melakukan banyak peminjaman
-    public function peminjamans() {
-        return $this->hasMany(Peminjaman::class);
+    /**
+     * RELASI: User memiliki banyak Notifikasi
+     * Ini untuk memperbaiki error "Call to undefined method notifikasi()"
+     */
+    public function notifikasi(): HasMany
+    {
+        // 'user_id' adalah foreign key di tabel notifikasis
+        return $this->hasMany(Notifikasi::class, 'user_id', 'id');
+    }
+
+    /**
+     * RELASI: User (Peminjam) memiliki banyak data Peminjaman
+     */
+    public function peminjamans(): HasMany
+    {
+        return $this->hasMany(Peminjaman::class, 'user_id', 'id');
     }
 }

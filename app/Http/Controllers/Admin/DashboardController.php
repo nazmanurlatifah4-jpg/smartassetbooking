@@ -36,11 +36,20 @@ class DashboardController extends Controller
             ->latest()
             ->limit(10)
             ->get();
+ 
+        // --- SIMPAN DI SINI (BARU) ---
+        $statCards = [
+    'total'     => $totalAset,
+    'menunggu'  => $menunggu,
+    'dipinjam'  => $aktif,
+    'terlambat' => $terlambat,
+];
 
-        return view('admin.dashboard', compact(
-            'totalUser', 'totalAset', 'menunggu',
-            'aktif', 'terlambat', 'denda',
-            'selesaiHariIni', 'pengajuanTerbaru'
-        ));
+return view('admin.dashboard', compact(
+    'totalUser', 'totalAset', 'menunggu',
+    'aktif', 'terlambat', 'denda',
+    'selesaiHariIni', 'pengajuanTerbaru', 
+    '$statCards' 
+));
     }
 }

@@ -10,12 +10,12 @@ class MasterdataController extends Controller
 {
     public function index()
     {
-        // Hanya peminjam yang ditampilkan di tabel — admin tidak perlu dikelola di sini
-        $users = User::where('role', 'peminjam')
-            ->latest()
-            ->get();
+    // Ambil SEMUA user tanpa filter role agar muncul semua di tabel
+    $users = User::latest()->get();
 
-        $asets = Aset::latest()->get();
+    // Ambil semua aset
+    $asets = Aset::latest()->get();
+
 
         // Daftar kategori unik dari tabel asets (bukan tabel sendiri)
         $kategoris = Aset::select('kategori')
