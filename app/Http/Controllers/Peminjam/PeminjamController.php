@@ -15,41 +15,30 @@ use Illuminate\Validation\Rule;
 class PeminjamController extends Controller
 {
     // ── DASHBOARD ────────────────────────────────────────────────
+    // ── DASHBOARD ────────────────────────────────────────────────
     public function dashboard()
     {
         $user = auth()->user();
 
-        // Stats — pakai status enum: Menunggu, Disetujui, Ditolak, Selesai
-        $aktif    = Peminjaman::where('user_id', $user->id)->where('status', 'Disetujui')->count();
-        $diproses = Peminjaman::where('user_id', $user->id)->where('status', 'Menunggu')->count();
-        $terlambat= Peminjaman::where('user_id', $user->id)
-                        ->where('status', 'Disetujui')
-                        ->where('tanggal_kembali', '<', now()->toDateString())
-                        ->count();
-        $selesai  = Peminjaman::where('user_id', $user->id)->where('status', 'Selesai')->count();
-        $total    = Peminjaman::where('user_id', $user->id)->count();
+        // 1. Hitung angka untuk Card
+        $stats = [
+            'aktif'     => Peminjaman::where('user_id', $user->id)->where('status', 'Disetujui')->count(),
+            'diproses'  => Peminjaman::where('user_id', $user->id)->where('status', 'Menunggu')->count(),
+            'terlambat' => Peminjaman::where('user_id', $user->id)
+                            ->where('status', 'Disetujui')
+                            ->where('tanggal_kembali', '<', now()->toDateString())
+                            ->count(),
+            'selesai'   => Peminjaman::where('user_id', $user->id)->where('status', 'Selesai')->count(),
+            'total'     => Peminjaman::where('user_id', $user->id)->count(),
+        ];
 
-        // Riwayat 6 terakhir untuk tabel dashboard
-        $riwayatTerbaru = Peminjaman::with('aset')
-            ->where('user_id', $user->id)
-            ->latest()
-            ->limit(6)
-            ->get();
+        // 2. Ambil data untuk Tabel & Sidebar (Gunakan nama yang konsisten)
+        $riwayatTerbaru = Peminjaman::with('aset')->where('user_id', $user->id)->latest()->limit(5)->get();
+        $riwayatSidebar = Peminjaman::with('aset')->where('user_id', $user->id)->where('status', 'Selesai')->latest()->limit(3)->get();
+        $notifSidebar   = Notifikasi::where('user_id', $user->id)->latest()->limit(3)->get();
 
-        // Riwayat 3 untuk sidebar kanan
-        $riwayatSidebar = Peminjaman::with('aset')
-            ->where('user_id', $user->id)
-            ->where('status', 'Selesai')
-            ->latest()
-            ->limit(3)
-            ->get();
-
-        return view('peminjam.dashboard', compact(
-            'aktif', 'diproses', 'terlambat', 'selesai', 'total',
-            'riwayatTerbaru', 'riwayatSidebar'
-        ));
+        return view('peminjam.dashboard', compact('stats', 'riwayatSidebar', 'notifSidebar', 'riwayatTerbaru'));
     }
-
     // ── DATA ASET ────────────────────────────────────────────────
     public function aset(Request $request)
     {
@@ -295,24 +284,4 @@ class PeminjamController extends Controller
         ));
     }
 
-    // ── NOTIFIKASI READ ──────────────────────────────────────────
-    public function notifRead(Request $request)
-    {
-        // Ubah dari notifikasis() menjadi notifikasi()
-        auth()->user()->notifikasi()
-            ->where('id', $request->id)
-            ->update(['tanda_baca' => 'Sudah Dibaca']);
-            
-        return response()->json(['ok' => true]);
     }
-
-    public function notifReadAll()
-    {
-        // Ubah dari notifikasis() menjadi notifikasi()
-        auth()->user()->notifikasi()
-            ->where('tanda_baca', 'Belum Dibaca')
-            ->update(['tanda_baca' => 'Sudah Dibaca']);
-            
-        return response()->json(['ok' => true]);
-    }
-}
