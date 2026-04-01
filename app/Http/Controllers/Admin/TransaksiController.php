@@ -19,7 +19,7 @@ class TransaksiController extends Controller
     // ── INDEX ─────────────────────────────────────────────────────
     public function index(Request $request)
     {
-        $query = Peminjaman::with(['user', 'aset', 'verifikasi', 'pengembalian']);
+        $query = Peminjaman::with(['user', 'aset']);
 
         // Filter status — enum sesuai migration: Menunggu, Disetujui, Ditolak, Selesai
         if ($request->filled('status')) {
@@ -39,16 +39,16 @@ class TransaksiController extends Controller
 
         // Stats
         $stats = [
-            'total'     => Peminjaman::count(),
-            'menunggu'  => Peminjaman::where('status', 'Menunggu')->count(),
-            'aktif'     => Peminjaman::where('status', 'Disetujui')->count(),
-            'terlambat' => Peminjaman::where('status', 'Disetujui')
-                            ->where('tanggal_kembali', '<', now()->toDateString())
-                            ->count(),
-        ];
+        'total'     => Peminjaman::count(),
+        'menunggu'  => Peminjaman::where('status', 'Menunggu')->count(),
+        'aktif'     => Peminjaman::where('status', 'Disetujui')->count(),
+        'terlambat' => Peminjaman::where('status', 'Disetujui')
+                        ->where('tanggal_kembali', '<', now()->toDateString())
+                        ->count(),
+    ];
 
         $users = User::where('role', 'peminjam')->get();
-        $asets = Aset::where('stok', '>', 0)->get();
+        $asets = Aset::all();
 
         return view('admin.transaksi', compact('peminjaman', 'stats', 'users', 'asets'));
     }
@@ -64,26 +64,31 @@ class TransaksiController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'user_id'          => ['required', 'exists:users,id'],
-            'aset_id'          => ['required', 'exists:asets,id'],
-            'tanggal_pengajuan'=> ['required', 'date'],
-            'tanggal_kembali'  => ['required', 'date', 'after_or_equal:tanggal_pengajuan'],
-            'keperluan'        => ['nullable', 'string', 'max:500'],
+            'user_id'         => ['required', 'exists:users,id'],
+            'aset_id'         => ['required', 'exists:asets,id'],
+            'tanggal_pinjam'  => ['required', 'date'],
+            'tanggal_kembali' => ['required', 'date', 'after_or_equal:tanggal_pinjam'],
+            'keperluan'       => ['nullable', 'string', 'max:500'],
         ]);
 
         $aset = Aset::findOrFail($data['aset_id']);
 
-        if ($aset->stokTersedia() < 1) {
-            return redirect()->route('admin.transaksi')
-                ->with('error', 'Stok aset ' . $aset->nama_aset . ' tidak tersedia!');
-        }
+        if ($aset->stok < 1) { 
+        return redirect()->back()->with('error', 'Stok aset tidak tersedia!');
+    }
 
         DB::transaction(function () use ($data, $aset) {
-            // Admin buat langsung → status Disetujui
-            $data['status']           = 'Disetujui';
-            $data['tanggal_disetujui'] = now()->toDateString();
 
-            $peminjaman = Peminjaman::create($data);
+            $peminjaman = Peminjaman::create([
+                'user_id'         => $data['user_id'],
+                'aset_id'         => $data['aset_id'],
+                'tanggal_pinjam'  => $data['tanggal_pinjam'],
+                'tanggal_pengajuan' => $data['tanggal_pinjam'],
+                'tanggal_kembali' => $data['tanggal_kembali'],
+                'keperluan'       => $data['keperluan'],
+                'status'          => 'Disetujui', 
+                'tanggal_disetujui' => now()->toDateString(),
+            ]);
 
             // Buat record verifikasi
             Verifikasi::create([
@@ -94,17 +99,28 @@ class TransaksiController extends Controller
                 'catatan'       => 'Dibuat langsung oleh admin.',
             ]);
 
+            // Kurangi stok aset
+            $aset->decrement('stok');
+
+            // Buat record verifikasi
+            Verifikasi::create([
+            'peminjaman_id' => $peminjaman->id,
+            'admin_id'      => auth()->id(),
+            'status'        => 'Disetujui',
+            'tanggal'       => now()->toDateString(),
+            'catatan'       => 'Dibuat langsung oleh admin.',
+        ]);
+
             // Kirim notifikasi ke peminjam
-            Notifikasi::kirim(
+                Notifikasi::kirim(
                 $peminjaman->user_id,
                 'Peminjaman Disetujui',
                 'Peminjaman ' . $aset->nama_aset . ' telah disetujui. Silakan ambil aset.'
             );
         });
 
-        return redirect()->route('admin.transaksi')
-            ->with('success', 'Peminjaman berhasil dibuat!');
-    }
+        return redirect()->route('admin.transaksi')->with('success', 'Peminjaman berhasil dibuat!');
+}
 
     // ── APPROVE ───────────────────────────────────────────────────
     public function approve(Request $request, Peminjaman $peminjaman)

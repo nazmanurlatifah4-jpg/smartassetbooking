@@ -190,7 +190,7 @@
             <span class="px-2 py-0.5 rounded-full text-xs font-semibold {{ $sc }}">{{ $a->status }}</span>
         </td>
 
-        {{-- 7. Aksi --}}
+        {{-- 7. Aksi Aset --}}
         <td class="p-3 border-b border-[#f1f5f9]">
             <div class="flex gap-1">
                 <button onclick="openEditAsetModal(this, '{{ $a->id }}')"
@@ -205,6 +205,7 @@
                     <i class="fas fa-edit"></i>
                 </button>
 
+                {{-- Tombol Hapus Aset --}}
                 <button onclick="openDeleteModal('aset', '{{ $a->nama_aset }}', '{{ $a->id }}')"
                     class="w-7 h-7 rounded-md bg-[#fee2e2] text-[#ef4444] hover:bg-[#ef4444] hover:text-white transition-all flex items-center justify-center text-xs">
                     <i class="fas fa-trash"></i>

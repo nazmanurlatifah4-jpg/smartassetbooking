@@ -32,15 +32,15 @@ $bc = match($peminjaman->status) {
         <div class="space-y-3">
             @php
             $fields = [
-                'ID Peminjaman'    => '#' . str_pad($peminjaman->id, 4, '0', STR_PAD_LEFT),
-                'Status'           => null, // rendered special
-                'Tanggal Pinjam'   => $peminjaman->tanggal_pinjam->format('d F Y'),
-                'Rencana Kembali'  => $peminjaman->tanggal_kembali_rencana->format('d F Y'),
-                'Aktual Kembali'   => $peminjaman->tanggal_kembali_aktual?->format('d F Y') ?? '-',
-                'Keperluan'        => $peminjaman->keperluan ?? '-',
-                'Kondisi Kembali'  => $peminjaman->catatan_kondisi ?? '-',
-                'Catatan Admin'    => $peminjaman->catatan_admin ?? '-',
-            ];
+    'ID Peminjaman'    => '#' . str_pad($peminjaman->id, 4, '0', STR_PAD_LEFT),
+    'Status'           => null,
+    'Tanggal Pinjam'   => $peminjaman->tanggal_pinjam?->format('d F Y') ?? '-',
+    'Rencana Kembali'  => $peminjaman->tanggal_kembali?->format('d F Y') ?? '-',
+    'Aktual Kembali'   => $peminjaman->pengembalian?->tanggal_pengembalian?->format('d F Y') ?? '-',
+    'Keperluan'        => $peminjaman->keperluan ?? '-',
+    'Kondisi Kembali'  => $peminjaman->pengembalian?->kondisi_barang ?? '-',
+    'Catatan Admin'    => $peminjaman->verifikasi?->catatan ?? '-',
+];
             @endphp
             @foreach($fields as $label => $val)
             <div class="flex justify-between items-start gap-3 border-b border-[#f1f5f9] pb-2 last:border-0 last:pb-0">
@@ -95,7 +95,7 @@ $bc = match($peminjaman->status) {
                 <i class="fas fa-box text-[#3b82f6]"></i> Data Aset
             </h3>
             <p class="font-semibold text-[#1e293b] text-sm mb-1">{{ $peminjaman->aset->nama }}</p>
-            <p class="text-xs text-[#64748b] mb-3">{{ $peminjaman->aset->kategori?->nama }}</p>
+            <p class="text-xs text-[#64748b] mb-3"> {{ is_object($peminjaman->aset->kategori) ? $peminjaman->aset->kategori->nama : ($peminjaman->aset->kategori ?? '-') }} </p>
             <div class="grid grid-cols-2 gap-2 text-xs">
                 <div class="bg-[#f8fafc] rounded-lg p-2">
                     <p class="text-[#94a3b8]">Kondisi</p>

@@ -252,7 +252,7 @@
         </main>
 
         <!-- Right Sidebar (xl only) -->
-        <aside class="right-sidebar-hide hidden xl:block w-[280px] p-5 bg-white border-l border-[#e2e8f0] sticky top-[64px] h-[calc(100vh-64px)] overflow-y-auto flex-shrink-0">
+        <aside class="right-sidebar-hide hidden xl:block w-[200px] p-5 bg-white border-l border-[#e2e8f0] sticky top-[64px] h-[calc(100vh-64px)] overflow-y-auto flex-shrink-0">
             <div class="mb-6">
                 <p class="text-sm font-semibold text-[#1e293b] mb-3 flex items-center gap-2"><i class="fas fa-bell text-[#3b82f6]"></i> Notifikasi</p>
                 <div class="p-3 bg-[#f8fafc] rounded-lg mb-2 border-l-4 border-[#3b82f6]">

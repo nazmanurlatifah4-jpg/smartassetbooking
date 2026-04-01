@@ -49,7 +49,7 @@ return view('admin.dashboard', compact(
     'totalUser', 'totalAset', 'menunggu',
     'aktif', 'terlambat', 'denda',
     'selesaiHariIni', 'pengajuanTerbaru', 
-    '$statCards' 
+    'statCards' 
 ));
     }
 }

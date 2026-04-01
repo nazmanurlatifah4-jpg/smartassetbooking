@@ -12,9 +12,9 @@
 </style>
 @endpush
 
-@section('content')
+    @section('content')
 
-@if(session('success'))
+     @if(session('success'))
 <div class="mb-4 bg-green-50 border border-green-200 text-green-700 text-sm rounded-xl px-4 py-3 flex items-center gap-2">
     <i class="fas fa-check-circle"></i> {{ session('success') }}
 </div>
@@ -45,10 +45,10 @@
 <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
     @php
     $statCards = [
-        ['label'=>'Total','val'=>$stats->total,'icon'=>'fas fa-list','bg'=>'bg-[#dbeafe]','c'=>'text-[#3b82f6]'],
-        ['label'=>'Menunggu','val'=>$stats->menunggu,'icon'=>'fas fa-clock','bg'=>'bg-[#fed7aa]','c'=>'text-[#f59e0b]'],
-        ['label'=>'Aktif','val'=>$stats->dipinjam,'icon'=>'fas fa-hand-holding','bg'=>'bg-[#d1fae5]','c'=>'text-[#10b981]'],
-        ['label'=>'Terlambat','val'=>$stats->terlambat,'icon'=>'fas fa-exclamation-triangle','bg'=>'bg-[#fecaca]','c'=>'text-[#ef4444]'],
+    ['label'=>'Total','val'=>$stats['total'],'icon'=>'fas fa-list','bg'=>'bg-[#dbeafe]','c'=>'text-[#3b82f6]'],
+    ['label'=>'Menunggu','val'=>$stats['menunggu'],'icon'=>'fas fa-clock','bg'=>'bg-[#fed7aa]','c'=>'text-[#f59e0b]'],
+    ['label'=>'Aktif','val'=>$stats['aktif'],'icon'=>'fas fa-hand-holding','bg'=>'bg-[#d1fae5]','c'=>'text-[#10b981]'], 
+    ['label'=>'Terlambat','val'=>$stats['terlambat'],'icon'=>'fas fa-exclamation-triangle','bg'=>'bg-[#fecaca]','c'=>'text-[#ef4444]'],
     ];
     @endphp
     @foreach($statCards as $sc)
@@ -99,7 +99,7 @@
                 <tbody>
                     @forelse($peminjaman as $p)
                     @php
-                        $bc = match($p->status) {
+                        $bc = match(strtolower($p->status)) {
                             'menunggu'  => 'bg-[#fed7aa] text-[#c2410c]',
                             'disetujui' => 'bg-[#d1fae5] text-[#065f46]',
                             'dipinjam'  => 'bg-[#dbeafe] text-[#1d4ed8]',
@@ -108,16 +108,16 @@
                             default     => 'bg-[#f1f5f9] text-[#64748b]',
                         };
                     @endphp
-                    <tr class="hover:bg-[#f8fafc] transition-colors">
+                    <tr class="{{ $p->isTerlambat() ? 'bg-red-50/50' : '' }} hover:bg-[#f8fafc] transition-colors">
                         <td class="p-3 text-xs text-[#475569] border-b border-[#f1f5f9]">{{ $peminjaman->firstItem() + $loop->index }}</td>
                         <td class="p-3 border-b border-[#f1f5f9]">
-                            <div class="text-xs font-medium text-[#1e293b]">{{ $p->user->name }}</div>
-                            <div class="text-[10px] text-[#94a3b8]">{{ $p->user->jurusan }}</div>
+                            <div class="text-xs font-medium text-[#1e293b]">{{ $p->user->nama }}</div>
+                            <div class="text-[10px] text-[#94a3b8]">{{ $p->user->jurusan ?? '-' }}</div>
                         </td>
-                        <td class="p-3 text-xs text-[#475569] border-b border-[#f1f5f9] hidden sm:table-cell">{{ $p->aset->nama }}</td>
-                        <td class="p-3 text-xs text-[#475569] border-b border-[#f1f5f9] hidden md:table-cell">{{ $p->tanggal_pinjam->format('d M Y') }}</td>
+                        <td class="p-3 text-xs text-[#475569] border-b border-[#f1f5f9] hidden sm:table-cell">{{ $p->aset->nama_aset }}</td>
+                        <td class="p-3 text-xs text-[#475569] border-b border-[#f1f5f9] hidden md:table-cell">{{ \Carbon\Carbon::parse($p->tanggal_pinjam)->format('d M Y') }}</td>
                         <td class="p-3 text-xs border-b border-[#f1f5f9] hidden md:table-cell {{ $p->isTerlambat() ? 'text-[#ef4444] font-semibold' : 'text-[#475569]' }}">
-                            {{ $p->tanggal_kembali_rencana->format('d M Y') }}
+                            {{ \Carbon\Carbon::parse($p->tanggal_kembali_rencana)->format('d M Y') }}
                             @if($p->isTerlambat())<div class="text-[10px]">+{{ $p->hari_terlambat }} hari</div>@endif
                         </td>
                         <td class="p-3 border-b border-[#f1f5f9]">
@@ -125,12 +125,12 @@
                         </td>
                         <td class="p-3 border-b border-[#f1f5f9]">
                             <div class="flex gap-1 flex-wrap">
-                                <a href="{{ route('admin.peminjaman.show', $p) }}"
+                                <a href="{{ route('admin.transaksi.show', $p) }}"
                                     class="w-7 h-7 rounded-md bg-[#dbeafe] text-[#3b82f6] hover:bg-[#3b82f6] hover:text-white transition-all flex items-center justify-center text-xs" title="Detail">
                                     <i class="fas fa-eye"></i>
                                 </a>
                                 @if($p->status === 'menunggu')
-                                <form method="POST" action="{{ route('admin.peminjaman.approve', $p) }}" class="inline">
+                                <form method="POST" action="{{ route('admin.transaksi.approve', $p) }}" class="inline">
                                     @csrf
                                     <button type="submit" class="w-7 h-7 rounded-md bg-[#d1fae5] text-[#10b981] hover:bg-[#10b981] hover:text-white transition-all flex items-center justify-center text-xs" title="Setujui">
                                         <i class="fas fa-check"></i>
@@ -148,7 +148,7 @@
                                 </button>
                                 @endif
                                 @if(in_array($p->status, ['selesai','ditolak']))
-                                <form method="POST" action="{{ route('admin.peminjaman.destroy', $p) }}" class="inline"
+                                <form method="POST" action="{{ route('admin.transaksi.destroy', $p) }}" class="inline"
                                     onsubmit="return confirm('Yakin hapus data ini?')">
                                     @csrf @method('DELETE')
                                     <button type="submit" class="w-7 h-7 rounded-md bg-[#fee2e2] text-[#ef4444] hover:bg-[#ef4444] hover:text-white transition-all flex items-center justify-center text-xs" title="Hapus">
@@ -183,14 +183,14 @@
             <h3 class="text-white font-semibold text-base"><i class="fas fa-plus-circle mr-2"></i>Buat Peminjaman</h3>
             <button onclick="closeModal('addTransaksiModal')" class="text-white/80 hover:text-white text-xl">&times;</button>
         </div>
-        <form method="POST" action="{{ route('admin.peminjaman.store') }}" class="p-6 space-y-4">
+        <form method="POST" action="{{ route('admin.transaksi.store') }}" class="p-6 space-y-4">
             @csrf
             <div>
                 <label class="field-label">Peminjam</label>
                 <select name="user_id" class="field-input" required>
                     <option value="">-- Pilih User --</option>
                     @foreach($users as $u)
-                    <option value="{{ $u->id }}">{{ $u->name }} ({{ $u->jurusan ?? 'Staff' }})</option>
+                    <option value="{{ $u->id }}">{{ $u->nama }} ({{ $u->jurusan ?? 'Peminjam' }})</option>
                     @endforeach
                 </select>
             </div>
@@ -199,7 +199,8 @@
                 <select name="aset_id" class="field-input" required>
                     <option value="">-- Pilih Aset --</option>
                     @foreach($asets as $a)
-                    <option value="{{ $a->id }}">{{ $a->nama }} (Stok: {{ $a->stok_tersedia }})</option>
+                    <option value="{{ $a->id }}"> {{ $a->nama_aset }} ({{ $a->stok ?? 0 }})
+                    </option>
                     @endforeach
                 </select>
             </div>
@@ -210,7 +211,7 @@
                 </div>
                 <div>
                     <label class="field-label">Tanggal Kembali</label>
-                    <input type="date" name="tanggal_kembali_rencana" class="field-input" required>
+                    <input type="date" name="tanggal_kembali" class="field-input" required>
                 </div>
             </div>
             <div>
