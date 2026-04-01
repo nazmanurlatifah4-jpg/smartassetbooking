@@ -67,32 +67,60 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @php
-                        $rows = [
-                            ['no'=>1,'name'=>'Budi Santoso','aset'=>'Laptop Lenovo','tgl'=>'07 Feb 2026','status'=>'Menunggu','cls'=>'bg-[#fed7aa] text-[#c2410c]'],
-                            ['no'=>2,'name'=>'Siti Nurhaliza','aset'=>'Proyektor Epson','tgl'=>'07 Feb 2026','status'=>'Disetujui','cls'=>'bg-[#d1fae5] text-[#065f46]'],
-                            ['no'=>3,'name'=>'Ahmad Ridwan','aset'=>'Kamera Canon','tgl'=>'06 Feb 2026','status'=>'Menunggu','cls'=>'bg-[#fed7aa] text-[#c2410c]'],
-                            ['no'=>4,'name'=>'Dewi Lestari','aset'=>'Sound System','tgl'=>'06 Feb 2026','status'=>'Ditolak','cls'=>'bg-[#fecaca] text-[#991b1b]'],
-                            ['no'=>5,'name'=>'Eko Prasetyo','aset'=>'iPad Pro','tgl'=>'05 Feb 2026','status'=>'Disetujui','cls'=>'bg-[#d1fae5] text-[#065f46]'],
-                        ];
-                    @endphp
-                    @foreach($rows as $r)
-                    <tr class="hover:bg-[#f8fafc] transition-colors">
-                        <td class="p-3 text-xs text-[#475569] border-b border-[#f1f5f9]">{{ $r['no'] }}</td>
-                        <td class="p-3 text-xs text-[#475569] border-b border-[#f1f5f9] font-medium">{{ $r['name'] }}</td>
-                        <td class="p-3 text-xs text-[#475569] border-b border-[#f1f5f9] hidden sm:table-cell">{{ $r['aset'] }}</td>
-                        <td class="p-3 text-xs text-[#475569] border-b border-[#f1f5f9] hidden md:table-cell">{{ $r['tgl'] }}</td>
-                        <td class="p-3 border-b border-[#f1f5f9]">
-                            <span class="px-2 py-1 rounded-full text-xs font-semibold {{ $r['cls'] }}">{{ $r['status'] }}</span>
-                        </td>
-                        <td class="p-3 border-b border-[#f1f5f9]">
-                            <button onclick="openModal('detailModal')" class="text-xs text-[#3b82f6] hover:underline flex items-center gap-1">
-                                <i class="fas fa-eye"></i> Detail
-                            </button>
-                        </td>
-                    </tr>
-                    @endforeach
-                </tbody>
+    @forelse($peminjamanTerbaru as $index => $p)
+    <tr class="hover:bg-[#f8fafc] transition-colors">
+        {{-- Nomor Urut --}}
+        <td class="p-3 text-xs text-[#475569] border-b border-[#f1f5f9]">
+            {{ $index + 1 }}
+        </td>
+        
+        {{-- Nama Peminjam --}}
+        <td class="p-3 text-xs text-[#475569] border-b border-[#f1f5f9] font-medium">
+            {{ $p->user->nama ?? 'User Tidak Ada' }}
+        </td>
+        
+        {{-- Nama Aset --}}
+        <td class="p-3 text-xs text-[#475569] border-b border-[#f1f5f9] hidden sm:table-cell">
+            {{ $p->aset->nama_aset ?? 'Aset Terhapus' }}
+        </td>
+        
+        {{-- Tanggal Pinjam --}}
+        <td class="p-3 text-xs text-[#475569] border-b border-[#f1f5f9] hidden md:table-cell">
+            {{ $p->tanggal_pengajuan->format('d M Y') }}
+        </td>
+        
+        {{-- Status dengan Warna Dinamis --}}
+        <td class="p-3 border-b border-[#f1f5f9]">
+            @php
+                // Logika warna otomatis berdasarkan status
+                $statusClasses = [
+                    'Menunggu' => 'bg-[#fed7aa] text-[#c2410c]',
+                    'Disetujui' => 'bg-[#d1fae5] text-[#065f46]',
+                    'Ditolak'   => 'bg-[#fecaca] text-[#991b1b]',
+                    'Selesai'   => 'bg-[#e0f2fe] text-[#0369a1]',
+                ];
+                $class = $statusClasses[$p->status] ?? 'bg-gray-100 text-gray-600';
+            @endphp
+            <span class="px-2 py-1 rounded-full text-xs font-semibold {{ $class }}">
+                {{ $p->status }}
+            </span>
+        </td>
+        
+        {{-- Tombol Detail --}}
+        <td class="p-3 border-b border-[#f1f5f9]">
+            <button onclick="openModal('detailModal')" class="text-xs text-[#3b82f6] hover:underline flex items-center gap-1">
+                <i class="fas fa-eye"></i> Detail
+            </button>
+        </td>
+    </tr>
+    @empty
+    <tr>
+        <td colspan="6" class="p-5 text-center text-gray-500 text-xs">
+            Belum ada pengajuan peminjaman saat ini.
+        </td>
+    </tr>
+    @endforelse
+</tbody>
             </table>
         </div>
     </div>

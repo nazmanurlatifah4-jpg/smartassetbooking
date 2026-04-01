@@ -16,6 +16,11 @@ class Peminjaman extends Model
         'tanggal_kembali', 'keperluan', 'status', 'catatan'
     ];
 
+    protected $casts = [
+    'tanggal_pengajuan' => 'date',
+    'tanggal_kembali' => 'date',
+    ];
+
     public function user() {
         return $this->belongsTo(User::class);
     }
