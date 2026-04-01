@@ -12,21 +12,42 @@ class Peminjaman extends Model
     protected $table = 'peminjamans';
 
     protected $fillable = [
-        'user_id', 'aset_id', 'tanggal_pengajuan', 'tanggal_disetujui', 
-        'tanggal_kembali', 'keperluan', 'status', 'catatan'
+        'user_id', 
+        'aset_id', 
+        'admin_id', // Pastikan kolom ini ada di database jika pakai relasi admin
+        'tanggal_pinjam',    
+        'tanggal_pengajuan', 
+        'tanggal_disetujui', 
+        'tanggal_kembali', 
+        'keperluan', 
+        'status', 
+        'catatan'
     ];
 
+    // SATU BLOK CASTS SAJA UNTUK SEMUA TANGGAL
     protected $casts = [
-    'tanggal_pengajuan' => 'date',
-    'tanggal_kembali' => 'date',
+        'tanggal_pinjam'    => 'date',
+        'tanggal_pengajuan' => 'date',
+        'tanggal_disetujui' => 'date',
+        'tanggal_kembali'   => 'date',
     ];
+
+    // --- Relasi ---
 
     public function user() {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'user_id');
     }
 
     public function aset() {
-        return $this->belongsTo(Aset::class);
+        return $this->belongsTo(Aset::class, 'aset_id');
+    }
+
+    public function admin() {
+        return $this->belongsTo(User::class, 'admin_id');
+    }
+
+    public function verifikasi() {
+        return $this->hasOne(Verifikasi::class);
     }
 
     public function pengembalian() {
@@ -37,7 +58,17 @@ class Peminjaman extends Model
         return $this->hasOne(Denda::class);
     }
 
+    // --- Helpers ---
+
     public function isTerlambat() {
-        return $this->tanggal_kembali < now() && $this->status !== 'Selesai';
+        // Cek apakah sudah melewati tanggal kembali dan belum selesai
+        if (!$this->tanggal_kembali || $this->status === 'Selesai') return false;
+        return $this->tanggal_kembali->isPast();
+    }
+    
+    // Hitung berapa hari terlambat
+    public function getHariTerlambatAttribute() {
+        if (!$this->isTerlambat()) return 0;
+        return $this->tanggal_kembali->diffInDays(now());
     }
 }

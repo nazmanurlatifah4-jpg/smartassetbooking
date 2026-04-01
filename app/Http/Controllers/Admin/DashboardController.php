@@ -43,17 +43,11 @@ class DashboardController extends Controller
             'terlambat' => $terlambat,
         ];
 
-        // 4. KIRIM SEMUA DALAM SATU RETURN (Jangan double)
-        return view('admin.dashboard', compact(
-            'totalUser', 
-            'totalAset', 
-            'menunggu', 
-            'aktif', 
-            'terlambat', 
-            'denda', 
-            'selesaiHariIni', 
-            'peminjamanTerbaru', 
-            'statCards'
-        ));
+return view('admin.dashboard', compact(
+    'totalUser', 'totalAset', 'menunggu',
+    'aktif', 'terlambat', 'denda',
+    'selesaiHariIni', 'pengajuanTerbaru', 
+    '$statCards' 
+));
     }
 }
