@@ -46,8 +46,8 @@ class DashboardController extends Controller
 return view('admin.dashboard', compact(
     'totalUser', 'totalAset', 'menunggu',
     'aktif', 'terlambat', 'denda',
-    'selesaiHariIni', 'pengajuanTerbaru', 
-    '$statCards' 
+    'selesaiHariIni', 'peminjamanTerbaru', 
+    'statCards' 
 ));
     }
 }

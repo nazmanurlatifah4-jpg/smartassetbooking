@@ -155,17 +155,27 @@
                 <span class="px-2 py-0.5 bg-[#fed7aa] text-[#c2410c] rounded-full text-xs font-semibold">Menunggu</span>
             </div>
         </div>
-        <div class="px-6 pb-5 flex gap-2">
-            <button class="flex-1 py-2 rounded-full bg-[#d1fae5] text-[#065f46] text-sm font-semibold hover:bg-[#a7f3d0] transition-colors">
-                <i class="fas fa-check mr-1"></i> Setujui
-            </button>
-            <button class="flex-1 py-2 rounded-full bg-[#fecaca] text-[#991b1b] text-sm font-semibold hover:bg-[#fca5a5] transition-colors">
-                <i class="fas fa-times mr-1"></i> Tolak
-            </button>
-            <button onclick="closeModal('detailModal')" class="px-4 py-2 rounded-full bg-[#f1f5f9] text-[#64748b] text-sm font-semibold hover:bg-[#e2e8f0] transition-colors">
-                Tutup
-            </button>
-        </div>
+        <div class="flex gap-2 mt-4">
+    <form action="{{ route('admin.transaksi.approve', $p->id) }}" method="POST" class="flex-1">
+        @csrf
+        <button type="submit" onclick="return confirm('Setujui peminjaman ini?')" 
+            class="w-full bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg font-semibold transition-all shadow-sm">
+            <i class="fas fa-check mr-1"></i> Setujui
+        </button>
+    </form>
+
+    <form action="{{ route('admin.transaksi.reject', $p->id) }}" method="POST">
+    @csrf
+    <div class="flex flex-col gap-2">
+        <textarea name="catatan" placeholder="Alasan ditolak..." class="text-xs p-2 border rounded-md"></textarea>
+        
+        <button type="submit" onclick="return confirm('Yakin ingin menolak peminjaman ini?')" 
+            class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg font-semibold transition-all">
+            <i class="fas fa-times mr-1"></i> Tolak Peminjaman
+        </button>
+    </div>
+</form>
+</div>
     </div>
 </div>
 

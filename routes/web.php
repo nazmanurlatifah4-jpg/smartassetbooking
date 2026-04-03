@@ -12,7 +12,6 @@ use App\Http\Controllers\Admin\TransaksiController;
 use App\Http\Controllers\Admin\DendaController;
 use App\Http\Controllers\Admin\LaporanController;
 use App\Http\Controllers\Peminjam\PeminjamController;
-use App\Http\Controllers\Admin\AdminController;
 
 // ─────────────────────────────────────────────────────────────────
 // PUBLIC & AUTH
@@ -79,9 +78,6 @@ Route::delete('/laporan/{laporan}',   [LaporanController::class, 'destroy']   )-
 Route::post  ('/laporan/quick-export',      [LaporanController::class, 'quickExport'])->name('laporan.quick-export');
 Route::get   ('/laporan/{laporan}/export',  [LaporanController::class, 'exportPdf'] )->name('laporan.export');
 Route::get   ('/laporan/{laporan}/preview', [LaporanController::class, 'previewPdf'])->name('laporan.preview');
-
-Route::get('/admin/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
-Route::post('/admin/peminjaman/{id}/setujui', [AdminController::class, 'setujui'])->name('admin.peminjaman.setujui');
 });
 
 

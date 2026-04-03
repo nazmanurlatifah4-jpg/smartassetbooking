@@ -53,7 +53,7 @@ class LaporanController extends Controller
         ];
 
         // ── Top 5 aset bulan ini ──────────────────────────────────
-        $topAset = Aset::withCount(['peminjamans as jumlah_pinjam' => fn($q) =>
+        $topAset = Aset::withCount(['peminjaman as jumlah_pinjam' => fn($q) =>
                 $q->whereBetween('tanggal_pengajuan', [
                     $periodeAwal->toDateString(),
                     $periodeAkhir->toDateString(),
@@ -165,7 +165,7 @@ class LaporanController extends Controller
             ->latest()
             ->get();
 
-        $topAset = Aset::withCount(['peminjamans as jumlah_pinjam' => fn($q) =>
+        $topAset = Aset::withCount(['peminjaman as jumlah_pinjam' => fn($q) =>
                 $q->whereBetween('tanggal_pengajuan', [
                     $periodeAwal->toDateString(),
                     $periodeAkhir->toDateString(),
@@ -242,7 +242,7 @@ class LaporanController extends Controller
                 ])
             )->latest()->get();
 
-        $topAset = Aset::withCount(['peminjamans as jumlah_pinjam' => fn($q) =>
+        $topAset = Aset::withCount(['peminjaman as jumlah_pinjam' => fn($q) =>
                 $q->whereBetween('tanggal_pengajuan', [
                     $periodeAwal->toDateString(),
                     $periodeAkhir->toDateString(),
@@ -322,7 +322,7 @@ class LaporanController extends Controller
                 ])
             )->latest()->get();
 
-        $topAset = Aset::withCount(['peminjamans as jumlah_pinjam' => fn($q) =>
+        $topAset = Aset::withCount(['peminjaman as jumlah_pinjam' => fn($q) =>
                 $q->whereBetween('tanggal_pengajuan', [
                     $periodeAwal->toDateString(),
                     $periodeAkhir->toDateString(),

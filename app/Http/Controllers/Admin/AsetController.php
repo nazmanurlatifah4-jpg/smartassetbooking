@@ -42,7 +42,8 @@ class AsetController extends Controller
         Aset::create($data);
 
         return redirect()->route('admin.masterdata')
-            ->with('success', 'Aset ' . $data['nama_aset'] . ' berhasil ditambahkan!');
+            ->with('success', 'Aset ' . $data['nama_aset'] . ' berhasil ditambahkan!')
+            ->with('active_tab', 'aset');
     }
 
     // ── UPDATE ────────────────────────────────────────────────────
@@ -67,13 +68,14 @@ class AsetController extends Controller
         $aset->update($data);
 
         return redirect()->route('admin.masterdata')
-            ->with('success', 'Aset ' . $aset->nama_aset . ' berhasil diperbarui!');
+            ->with('success', 'Aset ' . $aset->nama_aset . ' berhasil diperbarui!')
+            ->with('active_tab', 'aset');
     }
 
     // ── DESTROY ───────────────────────────────────────────────────
     public function destroy(Aset $aset)
     {
-        $masihDipinjam = $aset->peminjamans()
+        $masihDipinjam = $aset->peminjaman()
             ->whereIn('status', ['Menunggu', 'Disetujui'])
             ->exists();
 
@@ -89,6 +91,7 @@ class AsetController extends Controller
         $aset->delete(); // SoftDelete
 
         return redirect()->route('admin.masterdata')
-            ->with('success', 'Aset ' . $aset->nama_aset . ' berhasil dihapus!');
+            ->with('success', 'Aset ' . $aset->nama_aset . ' berhasil dihapus!')
+            ->with('active_tab', 'aset');
     }
 }

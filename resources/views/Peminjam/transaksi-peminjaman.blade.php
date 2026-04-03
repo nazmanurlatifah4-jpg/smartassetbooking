@@ -152,69 +152,90 @@
     }
 
     function renderCart() {
-        const container = document.getElementById('cartItemsContainer');
-        const emptyMsg  = document.getElementById('emptyCartMsg');
-        const dateFields= document.getElementById('dateFields');
-        const actionBtn = document.getElementById('actionButtons');
+    const container = document.getElementById('cartItemsContainer');
+    const emptyMsg  = document.getElementById('emptyCartMsg');
+    const dateFields= document.getElementById('dateFields');
+    const actionBtn = document.getElementById('actionButtons');
 
-        // Pre-fill aset dari query param ?aset=id
-        const params = new URLSearchParams(location.search);
-        const asetId = params.get('aset');
-        if (asetId && !cart.find(i => i.id == asetId)) {
-            // cari dari aset grid data yang di-pass blade (via JSON)
-            const asetData = window.asetData?.find(a => a.id == asetId);
-            if (asetData) cart.push({ id: asetData.id, name: asetData.nama_aset, stok: asetData.stok, jumlah: 1 });
-            localStorage.setItem('nexora_cart', JSON.stringify(cart));
-        }
-
-        if (cart.length === 0) {
-            emptyMsg.classList.remove('hidden');
-            dateFields.classList.add('hidden');
-            actionBtn.classList.add('hidden');
-            return;
-        }
-        emptyMsg.classList.add('hidden');
-        dateFields.classList.remove('hidden');
-        actionBtn.classList.remove('hidden');
-
-        let html = '';
-        cart.forEach((item, idx) => {
-            html += `
-            <div class="flex items-center gap-3 p-3 bg-[#f8fafc] rounded-xl mb-2 border border-[#e2e8f0]">
-                <div class="w-10 h-10 rounded-xl bg-[#dbeafe] flex items-center justify-center text-[#3b82f6] flex-shrink-0">
-                    <i class="fas fa-box"></i>
-                </div>
-                <div class="flex-1 min-w-0">
-                    <p class="text-sm font-semibold text-[#1e293b] truncate">${item.name}</p>
-                    <p class="text-xs text-[#64748b]">Stok tersedia: ${item.stok}</p>
-                </div>
-                <div class="flex items-center gap-2">
-                    <button onclick="changeQty(${idx}, -1)" class="w-7 h-7 rounded-full bg-gray-200 hover:bg-gray-300 text-gray-600 flex items-center justify-center text-sm font-bold">-</button>
-                    <input type="number" class="qty-input" value="${item.jumlah}" min="1" max="${item.stok}" onchange="setQty(${idx}, this.value)">
-                    <button onclick="changeQty(${idx}, 1)" class="w-7 h-7 rounded-full bg-gray-200 hover:bg-gray-300 text-gray-600 flex items-center justify-center text-sm font-bold">+</button>
-                </div>
-                <button onclick="removeFromCart(${idx})" class="w-7 h-7 rounded-full bg-red-100 hover:bg-red-200 text-red-500 flex items-center justify-center text-xs ml-1">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>`;
-        });
-        container.innerHTML = html;
+    if (cart.length === 0) {
+        container.innerHTML = '';
+        emptyMsg.classList.remove('hidden');
+        dateFields.classList.add('hidden');
+        actionBtn.classList.add('hidden');
+        return;
     }
+
+    emptyMsg.classList.add('hidden');
+    dateFields.classList.remove('hidden');
+    actionBtn.classList.remove('hidden');
+
+    let html = '';
+    cart.forEach((item, idx) => {
+        // PERHATIKAN BAGIAN FOTO DI BAWAH INI
+        html += `
+        <div class="flex items-center gap-3 p-3 bg-[#f8fafc] rounded-xl mb-2 border border-[#e2e8f0]">
+            
+            <div class="w-12 h-12 rounded-xl bg-[#dbeafe] overflow-hidden flex-shrink-0 border border-[#e2e8f0]">
+                <img src="${item.foto ? '/storage/' + item.foto : 'https://ui-avatars.com/api/?name=' + item.name + '&background=dbeafe&color=3b82f6'}" 
+                     class="w-full h-full object-cover" 
+                     alt="${item.name}"
+                     onerror="this.src='https://ui-avatars.com/api/?name=${item.name}&background=dbeafe&color=3b82f6'">
+            </div>
+
+            <div class="flex-1 min-w-0">
+                <p class="text-sm font-semibold text-[#1e293b] truncate">${item.name}</p>
+                <p class="text-[10px] text-[#64748b]">Stok tersedia: ${item.stok}</p>
+            </div>
+            
+            <div class="flex items-center gap-2">
+                <button type="button" onclick="changeQty(${idx}, -1)" class="w-8 h-8 rounded-lg bg-white border border-[#e2e8f0] text-gray-600 hover:bg-gray-100 flex items-center justify-center text-sm font-bold shadow-sm">-</button>
+                <input type="number" id="qty-input-${idx}" class="qty-input w-12 text-center border-none bg-transparent font-bold text-sm" value="${item.jumlah}" readonly>
+                <button type="button" onclick="changeQty(${idx}, 1)" class="w-8 h-8 rounded-lg bg-white border border-[#e2e8f0] text-gray-600 hover:bg-gray-100 flex items-center justify-center text-sm font-bold shadow-sm">+</button>
+            </div>
+            
+            <button type="button" onclick="removeFromCart(${idx})" class="w-8 h-8 rounded-lg bg-red-50 text-red-500 hover:bg-red-100 flex items-center justify-center ml-2 transition-colors">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>`;
+    });
+    container.innerHTML = html;
+}
 
     function changeQty(idx, delta) {
-        cart[idx].jumlah = Math.max(1, Math.min(cart[idx].stok, cart[idx].jumlah + delta));
-        localStorage.setItem('nexora_cart', JSON.stringify(cart));
-        renderCart();
+        let currentQty = parseInt(cart[idx].jumlah) || 1;
+        let newQty = currentQty + delta;
+        
+        if (newQty >= 1 && newQty <= cart[idx].stok) {
+            cart[idx].jumlah = newQty;
+            localStorage.setItem('nexora_cart', JSON.stringify(cart));
+            
+            // Perbaikan: Langsung update value input di layar tanpa nunggu render ulang full
+            const inputEl = document.getElementById(`qty-input-${idx}`);
+            if (inputEl) {
+                inputEl.value = newQty;
+            }
+            
+            // Tetap panggil renderCart untuk memastikan sinkronisasi elemen lain (opsional tapi aman)
+            renderCart(); 
+        } else if (newQty > cart[idx].stok) {
+            alert('Stok tidak mencukupi!');
+        }
     }
+
     function setQty(idx, val) {
         cart[idx].jumlah = Math.max(1, Math.min(cart[idx].stok, parseInt(val) || 1));
         localStorage.setItem('nexora_cart', JSON.stringify(cart));
+        renderCart(); 
     }
+
     function removeFromCart(idx) {
-        cart.splice(idx, 1);
-        localStorage.setItem('nexora_cart', JSON.stringify(cart));
-        renderCart();
+        if(confirm('Hapus aset ini dari daftar?')) {
+            cart.splice(idx, 1);
+            localStorage.setItem('nexora_cart', JSON.stringify(cart));
+            renderCart();
+        }
     }
+
     function validateDurasi() {
         const p = document.getElementById('tglPinjam').value;
         const k = document.getElementById('tglKembali').value;
@@ -232,27 +253,25 @@
         const tglK   = document.getElementById('tglKembali').value;
         const tujuan = document.getElementById('tujuan').value.trim();
 
-        if (!tglP || !tglK)   { showToast('Isi tanggal pinjam dan kembali!', 'error'); return; }
-        if (!tujuan)           { showToast('Isi tujuan peminjaman!', 'error'); return; }
-        if (cart.length === 0) { showToast('Keranjang kosong!', 'error'); return; }
+        if (!tglP || !tglK)   { alert('Isi tanggal pinjam dan kembali!'); return; }
+        if (!tujuan)           { alert('Isi tujuan peminjaman!'); return; }
+        if (cart.length === 0) { alert('Keranjang kosong!'); return; }
 
         const diff = Math.round((new Date(tglK) - new Date(tglP)) / 86400000);
-        if (diff < 0 || diff > 7) { showToast('Durasi peminjaman harus 1–7 hari!', 'error'); return; }
+        if (diff < 0 || diff > 7) { alert('Durasi peminjaman harus 1–7 hari!'); return; }
 
-        // Submit ke server via POST
         const form = document.createElement('form');
         form.method = 'POST';
         form.action = '{{ route("peminjam.peminjaman.store") }}';
-        form.innerHTML = `<input name="_token" value="{{ csrf_token() }}">
-            <input name="tanggal_pengajuan" value="${tglP}">
-            <input name="tanggal_kembali" value="${tglK}">
-            <input name="keperluan" value="${tujuan}">
-            <input name="cart" value='${JSON.stringify(cart)}'>`;
+        form.innerHTML = `<input type="hidden" name="_token" value="{{ csrf_token() }}">
+            <input type="hidden" name="tanggal_pengajuan" value="${tglP}">
+            <input type="hidden" name="tanggal_kembali" value="${tglK}">
+            <input type="hidden" name="keperluan" value="${tujuan}">
+            <input type="hidden" name="cart" value='${JSON.stringify(cart)}'>`;
         document.body.appendChild(form);
         form.submit();
     }
 
-    // Jalankan saat load
     renderCart();
 </script>
 @endpush

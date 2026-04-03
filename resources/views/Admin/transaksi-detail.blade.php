@@ -137,31 +137,29 @@ $bc = match($peminjaman->status) {
     </div>
 </div>
 
-{{-- Action Buttons --}}
+{{{-- Action Buttons --}}
 <div class="mt-5 bg-white rounded-2xl p-5 shadow-sm border border-[#e2e8f0]">
     <h3 class="text-sm font-semibold text-[#1e293b] mb-3">Aksi</h3>
-    <div class="flex flex-wrap gap-2">
-        @if($peminjaman->status === 'menunggu')
-        <form method="POST" action="{{ route('admin.peminjaman.approve', $peminjaman) }}" class="inline">
+    <div class="flex items-center gap-3 mt-6">
+    @if($peminjaman->status === 'Menunggu')
+        {{-- Tombol Setuju --}}
+        <form action="{{ route('admin.transaksi.approve', $peminjaman->id) }}" method="POST" class="flex-1">
             @csrf
-            <button type="submit" class="px-4 py-2 bg-[#d1fae5] text-[#065f46] rounded-lg text-sm font-semibold hover:bg-[#a7f3d0] transition-colors">
-                <i class="fas fa-check mr-1"></i> Setujui
+            <button type="submit" class="w-full bg-green-500 hover:bg-green-600 text-white px-4 py-2.5 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2">
+                <i class="fas fa-check"></i> Setujui
             </button>
         </form>
-        <button onclick="document.getElementById('tolakForm').action='{{ route('admin.peminjaman.reject', $peminjaman) }}'; openModal('tolakModal')"
-            class="px-4 py-2 bg-[#fecaca] text-[#991b1b] rounded-lg text-sm font-semibold hover:bg-[#fca5a5] transition-colors">
-            <i class="fas fa-times mr-1"></i> Tolak
-        </button>
-        @endif
 
-        @if(in_array($peminjaman->status, ['disetujui','dipinjam','terlambat']))
-        <button onclick="document.getElementById('kembaliForm').action='{{ route('admin.peminjaman.kembali', $peminjaman) }}'; openModal('kembaliModal')"
-            class="px-4 py-2 bg-[#e0e7ff] text-[#3730a3] rounded-lg text-sm font-semibold hover:bg-[#c7d2fe] transition-colors">
-            <i class="fas fa-undo mr-1"></i> Konfirmasi Kembali
-        </button>
-        @endif
-
-        <a href="{{ route('admin.transaksi') }}" class="px-4 py-2 bg-[#f1f5f9] text-[#64748b] rounded-lg text-sm font-semibold hover:bg-[#e2e8f0] transition-colors">
+        {{-- Tombol Tolak --}}
+        <form action="{{ route('admin.transaksi.reject', $peminjaman->id) }}" method="POST" class="flex-1">
+            @csrf
+            <button type="submit" onclick="return confirm('Yakin ingin menolak ini?')" class="w-full bg-red-500 hover:bg-red-600 text-white px-4 py-2.5 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2">
+                <i class="fas fa-times"></i> Tolak
+            </button>
+        </form>
+    @endif
+        {{-- Tombol Kembali Selalu Ada --}}
+        <a href="{{ route('admin.transaksi') }}" class="px-4 py-2 bg-[#f1f5f9] text-[#64748b] rounded-lg text-sm font-semibold hover:bg-[#e2e8f0]">
             <i class="fas fa-arrow-left mr-1"></i> Kembali
         </a>
     </div>
