@@ -3,9 +3,6 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use App\Models\Verifikasi;
-use App\Models\Pengembalian;
-use App\Models\Denda;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Peminjaman extends Model
@@ -17,6 +14,7 @@ class Peminjaman extends Model
     protected $fillable = [
         'user_id', 
         'aset_id', 
+        'admin_id', // Pastikan kolom ini ada di database jika pakai relasi admin
         'tanggal_pinjam',    
         'tanggal_pengajuan', 
         'tanggal_disetujui', 
@@ -26,6 +24,7 @@ class Peminjaman extends Model
         'catatan'
     ];
 
+    // SATU BLOK CASTS SAJA UNTUK SEMUA TANGGAL
     protected $casts = [
         'tanggal_pinjam'    => 'date',
         'tanggal_pengajuan' => 'date',
@@ -35,21 +34,19 @@ class Peminjaman extends Model
 
     // --- Relasi ---
 
-    public function admin()
-    {
-    return $this->belongsTo(User::class, 'admin_id');
-    }
-
     public function user() {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'user_id');
     }
 
     public function aset() {
-        return $this->belongsTo(Aset::class);
+        return $this->belongsTo(Aset::class, 'aset_id');
     }
 
-    public function verifikasi()
-    {
+    public function admin() {
+        return $this->belongsTo(User::class, 'admin_id');
+    }
+
+    public function verifikasi() {
         return $this->hasOne(Verifikasi::class);
     }
 

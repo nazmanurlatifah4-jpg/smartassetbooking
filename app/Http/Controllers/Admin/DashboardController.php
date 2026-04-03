@@ -12,43 +12,41 @@ class DashboardController extends Controller
 {
     public function index()
     {
-        // Stats — pakai nama kolom & enum sesuai migration
-        $totalUser  = User::where('role', 'peminjam')->count();
-        $totalAset  = Aset::count();
+        // 1. Ambil data statistik
+        $totalUser      = User::where('role', 'peminjam')->count();
+        $totalAset      = Aset::count();
+        $menunggu       = Peminjaman::where('status', 'Menunggu')->count();
+        $aktif          = Peminjaman::where('status', 'Disetujui')->count();
+        
+        $terlambat      = Peminjaman::where('status', 'Disetujui')
+                            ->where('tanggal_kembali', '<', now()->toDateString())
+                            ->count();
 
-        $menunggu   = Peminjaman::where('status', 'Menunggu')->count();
-
-        $aktif      = Peminjaman::where('status', 'Disetujui')->count();
-
-        // Terlambat = status Disetujui tapi tanggal_kembali sudah lewat
-        $terlambat  = Peminjaman::where('status', 'Disetujui')
-                        ->where('tanggal_kembali', '<', now()->toDateString())
-                        ->count();
-
-        $denda      = Denda::where('status_bayar', 'Belum Lunas')->count();
+        $denda          = Denda::where('status_bayar', 'Belum Lunas')->count();
 
         $selesaiHariIni = Peminjaman::where('status', 'Selesai')
                             ->whereDate('updated_at', today())
                             ->count();
 
-        // Pengajuan terbaru (10 terakhir) — eager load user & aset
-        $pengajuanTerbaru = Peminjaman::with(['user', 'aset'])
-            ->latest()
-            ->limit(10)
-            ->get();
- 
-        // --- SIMPAN DI SINI (BARU) ---
+        // 2. Ambil data peminjaman untuk tabel (PAKAI SATU NAMA SAJA)
+        // Kita pakai nama 'peminjamanTerbaru' supaya cocok dengan @foreach di Blade kamu
+        $peminjamanTerbaru = Peminjaman::with(['user', 'aset'])
+                            ->latest()
+                            ->limit(10)
+                            ->get();
+
+        // 3. Masukkan ke array statCards untuk kotak-kotak di dashboard
         $statCards = [
-    'total'     => $totalAset,
-    'menunggu'  => $menunggu,
-    'dipinjam'  => $aktif,
-    'terlambat' => $terlambat,
-];
+            'total'     => $totalAset,
+            'menunggu'  => $menunggu,
+            'dipinjam'  => $aktif,
+            'terlambat' => $terlambat,
+        ];
 
 return view('admin.dashboard', compact(
     'totalUser', 'totalAset', 'menunggu',
     'aktif', 'terlambat', 'denda',
-    'selesaiHariIni', 'pengajuanTerbaru', 
+    'selesaiHariIni', 'peminjamanTerbaru', 
     'statCards' 
 ));
     }

@@ -11,6 +11,7 @@ class Denda extends Model
         'tarif_per_hari', 'total_denda', 'status_bayar', 'tanggal_lunas', 'catatan_admin'
     ];
 
+
     public function peminjaman() {
         return $this->belongsTo(Peminjaman::class);
     }

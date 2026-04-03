@@ -135,7 +135,7 @@
                 </button>
                 <button class="flex-1 py-2 bg-green-500 text-white rounded-lg text-xs sm:text-sm font-semibold hover:bg-green-600 hover:-translate-y-0.5 hover:shadow-md transition-all flex items-center justify-center gap-1"
                     id="btn-{{ $aset->id }}"
-                    onclick="addToCart({{ $aset->id }}, '{{ addslashes($aset->nama_aset) }}', {{ $tersedia }}, this)">
+                    onclick="addToCart('{{ $aset->id }}', '{{ $aset->nama_aset }}', {{ $tersedia }}, '{{ $aset->foto }}', this)">
                     <i class="fas fa-cart-plus"></i> +Keranjang
                 </button>
             </div>
@@ -216,10 +216,10 @@
         setTimeout(() => { location.href = '{{ route("peminjam.peminjaman") }}?aset=' + id; }, 1000);
     }
 
-    function addToCart(id, name, stok, btn) {
+    function addToCart(id, name, stok, foto, btn) {
         if (stok === 0) { showToast('Stok habis!', 'error'); return; }
         if (cart.find(i => i.id === id)) { showToast('Sudah ada di keranjang!', 'error'); return; }
-        cart.push({ id, name, stok, jumlah: 1 });
+        cart.push({ id, name, stok, foto, jumlah: 1 });
         localStorage.setItem('nexora_cart', JSON.stringify(cart));
         updateCartUI();
         btn.innerHTML = '<i class="fas fa-check"></i> +Keranjang';

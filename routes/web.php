@@ -81,6 +81,7 @@ Route::get   ('/laporan/{laporan}/export',  [LaporanController::class, 'exportPd
 Route::get   ('/laporan/{laporan}/preview', [LaporanController::class, 'previewPdf'])->name('laporan.preview');
 });
 
+
 // ─────────────────────────────────────────────────────────────────
 // PEMINJAM ROUTES — role:peminjam
 // ─────────────────────────────────────────────────────────────────

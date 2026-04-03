@@ -76,70 +76,85 @@
             @endif
 
             <!-- Form -->
-            <form method="POST" action="{{ route('login') }}" class="space-y-5 md:space-y-6">
-                @csrf
+            <form method="POST" action="{{ route('login') }}" class="space-y-5 md:space-y-6" autocomplete="off">
+    @csrf
 
-                <!-- Email -->
-                <div>
-                    <label class="block text-xs font-semibold text-[#64748b] mb-1.5 uppercase tracking-wider">Email Address</label>
-                    <div class="relative">
-                        <i class="fas fa-envelope absolute left-3.5 top-1/2 -translate-y-1/2 text-[#94a3b8] text-sm"></i>
-                        <input
-                            type="email"
-                            name="email"
-                            value="{{ old('email') }}"
-                            placeholder="admin@nexora.sch.id"
-                            required autofocus
-                            class="input-line w-full pl-10 pr-4 py-3 border-b-2 border-[#e2e8f0] text-sm text-[#1e293b] focus:outline-none transition-colors bg-transparent placeholder-[#cbd5e1] @error('email') border-red-400 @enderror"
-                        >
-                    </div>
-                    @error('email')
-                        <p class="text-xs text-red-500 mt-1"><i class="fas fa-exclamation-circle mr-1"></i>{{ $message }}</p>
-                    @enderror
-                </div>
+    <input type="text" style="display:none" name="prevent_autofill_email">
+    <input type="password" style="display:none" name="prevent_autofill_password">
 
-                <!-- Password -->
-                <div>
-                    <label class="block text-xs font-semibold text-[#64748b] mb-1.5 uppercase tracking-wider">Password</label>
-                    <div class="relative">
-                        <i class="fas fa-lock absolute left-3.5 top-1/2 -translate-y-1/2 text-[#94a3b8] text-sm"></i>
-                        <input
-                            type="password"
-                            name="password"
-                            id="passwordInput"
-                            placeholder="••••••••"
-                            required
-                            class="input-line w-full pl-10 pr-10 py-3 border-b-2 border-[#e2e8f0] text-sm text-[#1e293b] focus:outline-none transition-colors bg-transparent placeholder-[#cbd5e1] @error('password') border-red-400 @enderror"
-                        >
-                        <span onclick="togglePassword()" class="eye-toggle absolute right-3 top-1/2 -translate-y-1/2 text-[#94a3b8] hover:text-[#3b82f6] text-sm transition-colors">
-                            <i id="eyeIcon" class="fas fa-eye"></i>
-                        </span>
-                    </div>
-                    @error('password')
-                        <p class="text-xs text-red-500 mt-1"><i class="fas fa-exclamation-circle mr-1"></i>{{ $message }}</p>
-                    @enderror
-                </div>
+    <div>
+        <label class="block text-xs font-semibold text-[#64748b] mb-1.5 uppercase tracking-wider">Email Address</label>
+        <div class="relative">
+            <i class="fas fa-envelope absolute left-3.5 top-1/2 -translate-y-1/2 text-[#94a3b8] text-sm"></i>
+            <input
+                type="email"
+                name="email"
+                value="{{ old('email') }}"
+                placeholder="admin@nexora.sch.id"
+                required autofocus
+                autocomplete="off" {{-- Tambahkan ini --}}
+                class="input-line w-full pl-10 pr-4 py-3 border-b-2 border-[#e2e8f0] text-sm text-[#1e293b] focus:outline-none transition-colors bg-transparent placeholder-[#cbd5e1] @error('email') border-red-400 @enderror"
+            >
+        </div>
+        @error('email')
+            <p class="text-xs text-red-500 mt-1"><i class="fas fa-exclamation-circle mr-1"></i>{{ $message }}</p>
+        @enderror
+    </div>
 
-                <!-- Remember + Forgot -->
-                <div class="flex items-center justify-between text-xs">
-                    <label class="flex items-center gap-2 text-[#64748b] cursor-pointer">
-                        <input type="checkbox" name="remember" class="rounded border-[#e2e8f0] text-[#3b82f6] focus:ring-[#3b82f6]">
-                        Ingat saya
-                    </label>
-                    @if (Route::has('password.request'))
-                        <a href="{{ route('password.request') }}" class="text-[#3b82f6] hover:underline">Lupa password?</a>
-                    @endif
-                </div>
+    <div>
+        <label class="block text-xs font-semibold text-[#64748b] mb-1.5 uppercase tracking-wider">Password</label>
+        <div class="relative">
+            <i class="fas fa-lock absolute left-3.5 top-1/2 -translate-y-1/2 text-[#94a3b8] text-sm"></i>
+            <input
+                type="password"
+                name="password"
+                id="passwordInput"
+                placeholder="••••••••"
+                required
+                autocomplete="new-password" {{-- Gunakan new-password agar browser tidak menarik data lama --}}
+                class="input-line w-full pl-10 pr-10 py-3 border-b-2 border-[#e2e8f0] text-sm text-[#1e293b] focus:outline-none transition-colors bg-transparent placeholder-[#cbd5e1] @error('password') border-red-400 @enderror"
+            >
+            <span onclick="togglePassword()" class="eye-toggle absolute right-3 top-1/2 -translate-y-1/2 text-[#94a3b8] hover:text-[#3b82f6] text-sm transition-colors cursor-pointer">
+                <i id="eyeIcon" class="fas fa-eye"></i>
+            </span>
+        </div>
+        @error('password')
+            <p class="text-xs text-red-500 mt-1"><i class="fas fa-exclamation-circle mr-1"></i>{{ $message }}</p>
+        @enderror
+    </div>
 
-                <!-- Submit -->
-                <button
-                    type="submit"
-                    class="w-full py-3 sm:py-3.5 bg-gradient-to-r from-[#547baf] via-[#3b82f6] to-[#2563eb] text-white rounded-full text-sm sm:text-base font-semibold shadow-[0_4px_15px_rgba(59,130,246,0.35)] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(59,130,246,0.4)] active:scale-[0.98] transition-all duration-200"
-                >
-                    <i class="fas fa-sign-in-alt mr-2"></i> MASUK SEKARANG
-                </button>
-            </form>
+    <div class="flex items-center justify-between text-xs">
+        <label class="flex items-center gap-2 text-[#64748b] cursor-pointer">
+            <input type="checkbox" name="remember" class="rounded border-[#e2e8f0] text-[#3b82f6] focus:ring-[#3b82f6]">
+            Ingat saya
+        </label>
+        @if (Route::has('password.request'))
+            <a href="{{ route('password.request') }}" class="text-[#3b82f6] hover:underline">Lupa password?</a>
+        @endif
+    </div>
 
+    <button
+        type="submit"
+        class="w-full py-3 sm:py-3.5 bg-gradient-to-r from-[#547baf] via-[#3b82f6] to-[#2563eb] text-white rounded-full text-sm sm:text-base font-semibold shadow-[0_4px_15px_rgba(59,130,246,0.35)] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(59,130,246,0.4)] active:scale-[0.98] transition-all duration-200"
+    >
+        <i class="fas fa-sign-in-alt mr-2"></i> MASUK SEKARANG
+    </button>
+</form>
+
+<script>
+function togglePassword() {
+    const passwordInput = document.getElementById('passwordInput');
+    const eyeIcon = document.getElementById('eyeIcon');
+    
+    if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        eyeIcon.classList.replace('fa-eye', 'fa-eye-slash');
+    } else {
+        passwordInput.type = 'password';
+        eyeIcon.classList.replace('fa-eye-slash', 'fa-eye');
+    }
+}
+</script>
             <!-- Footer Note -->
             <p class="text-center text-[10px] text-[#94a3b8] mt-6">
                 Sistem ini hanya untuk personel yang berwenang. <br>

@@ -11,6 +11,10 @@ class Pengembalian extends Model
         'foto', 'status_verifikasi', 'catatan_admin'
     ];
 
+    protected $casts = [
+        'tanggal_pengembalian' => 'datetime',
+    ];
+
     public function peminjaman() {
         return $this->belongsTo(Peminjaman::class);
     }

@@ -18,6 +18,10 @@ class Notifikasi extends Model
         'tanggal_kirim'
     ];
 
+    protected $casts = [
+    'tanggal_kirim' => 'datetime',
+    ];
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id', 'id');

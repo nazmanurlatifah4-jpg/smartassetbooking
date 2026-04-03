@@ -193,24 +193,26 @@
         {{-- 7. Aksi Aset --}}
         <td class="p-3 border-b border-[#f1f5f9]">
             <div class="flex gap-1">
-                <button onclick="openEditAsetModal(this, '{{ $a->id }}')"
-                    data-kode="{{ $a->kode_aset }}"
-                    data-nama_aset="{{ $a->nama_aset }}" 
-                    data-kategori="{{ $a->kategori }}"
-                    data-kondisi="{{ $a->kondisi }}"
-                    data-stok="{{ $a->stok }}"
-                    data-lokasi="{{ $a->lokasi }}"
-                    data-foto="{{ $a->foto }}"
-                    class="w-7 h-7 rounded-md bg-[#dbeafe] text-[#3b82f6] hover:bg-[#3b82f6] hover:text-white transition-all flex items-center justify-center text-xs">
-                    <i class="fas fa-edit"></i>
-                </button>
 
-                {{-- Tombol Hapus Aset --}}
-                <button onclick="openDeleteModal('aset', '{{ $a->nama_aset }}', '{{ $a->id }}')"
-                    class="w-7 h-7 rounded-md bg-[#fee2e2] text-[#ef4444] hover:bg-[#ef4444] hover:text-white transition-all flex items-center justify-center text-xs">
-                    <i class="fas fa-trash"></i>
-                </button>
-            </div>
+{{-- Tombol Edit Aset --}}
+<button type="button" 
+    onclick="openEditAsetModal(this, '{{ $a->id }}')" 
+    class="w-7 h-7 rounded-md bg-[#dbeafe] text-[#3b82f6] hover:bg-[#3b82f6] hover:text-white transition-all flex items-center justify-center text-xs"
+    data-kode="{{ $a->kode_aset }}"
+    data-nama="{{ $a->nama_aset }}"
+    data-kategori="{{ $a->kategori }}"
+    data-kondisi="{{ $a->kondisi }}"
+    data-stok="{{ $a->stok }}"
+    data-lokasi="{{ $a->lokasi }}"
+    data-foto="{{ $a->foto }}"> 
+    <i class="fas fa-edit"></i>
+</button>
+
+{{-- Tombol Hapus Aset --}}
+<button onclick="openDeleteModal('aset', '{{ $a->nama_aset }}', '{{ $a->id }}')"
+    class="w-7 h-7 rounded-md bg-[#fee2e2] text-[#ef4444] hover:bg-[#ef4444] hover:text-white transition-all flex items-center justify-center text-xs">
+    <i class="fas fa-trash"></i>
+</button>            </div>
         </td>
     </tr>
     @endforeach
@@ -230,43 +232,76 @@
             <h3 class="text-white font-semibold text-base"><i class="fas fa-user-plus mr-2"></i>Tambah User</h3>
             <button onclick="closeModal('addUserModal')" class="text-white/80 hover:text-white text-xl">&times;</button>
         </div>
-        <form method="POST" action="{{ route('admin.users.store') }}" class="p-6 space-y-4">
-            @csrf
-            <div>
-                <label class="field-label">Nama Lengkap</label>
-                <input type="text" name="nama" placeholder="Nama lengkap..." class="field-input" required>
-            </div>
-            <div>
-                <label class="field-label">Email</label>
-                <input type="email" name="email" placeholder="email@sekolah.id" class="field-input" required>
-            </div>
-            <div class="grid grid-cols-2 gap-3">
-                <div>
-                    <label class="field-label">Role</label>
-                    <select name="role" class="field-input">
-                        <option value="peminjam">Peminjam</option>
-                        <option value="manajemen">Manajemen</option>
-                        <option value="admin">Admin</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="field-label">Jurusan</label>
-                    <input type="text" name="jurusan" placeholder="Jurusan/Dept." class="field-input">
-                </div>
-            </div>
-            <div>
-                <label class="field-label">Password</label>
-                <input type="password" name="password" placeholder="Password..." class="field-input" required>
-            </div>
-            <div class="flex gap-2 pt-2">
-                <button type="submit" class="flex-1 py-2.5 bg-gradient-to-r from-[#3b82f6] to-[#2563eb] text-white rounded-lg text-sm font-semibold hover:opacity-90 transition-opacity">
-                    <i class="fas fa-save mr-1"></i> Simpan
-                </button>
-                <button type="button" onclick="closeModal('addUserModal')" class="px-4 py-2.5 bg-[#f1f5f9] text-[#64748b] rounded-lg text-sm font-semibold hover:bg-[#e2e8f0] transition-colors">
-                    Batal
-                </button>
-            </div>
-        </form>
+        <form method="POST" action="{{ route('admin.users.store') }}" class="p-6 space-y-4" autocomplete="off">
+    @csrf
+    {{-- Tambahkan input dummy agar browser tidak melakukan autofill ke input yang asli --}}
+    <input type="text" style="display:none">
+    <input type="password" style="display:none">
+
+    <div>
+        <label class="field-label">Nama Lengkap</label>
+        <input type="text" name="nama" placeholder="Nama lengkap..." class="field-input" required autocomplete="off">
+    </div>
+
+    <div>
+        <label class="field-label">Email</label>
+        <input type="email" name="email" placeholder="email@sekolah.id" class="field-input" required autocomplete="off">
+    </div>
+
+    <div class="grid grid-cols-2 gap-3">
+        <div>
+            <label class="field-label">Role</label>
+            <select name="role" class="field-input">
+                <option value="peminjam">Peminjam</option>
+                <option value="manajemen">Manajemen</option>
+                <option value="admin">Admin</option>
+            </select>
+        </div>
+        <div>
+            <label class="field-label">Jurusan</label>
+            <input type="text" name="jurusan" placeholder="Jurusan/Dept." class="field-input" autocomplete="off">
+        </div>
+    </div>
+
+    {{-- Input Password dengan Tombol Mata --}}
+    <div>
+        <label class="field-label">Password</label>
+        <div class="relative">
+            <input type="password" id="password_tambah" name="password" 
+                   placeholder="Password..." class="field-input pr-10" 
+                   required autocomplete="new-password">
+            
+            <button type="button" onclick="togglePasswordVisibility('password_tambah', 'eye_icon_tambah')" 
+                    class="absolute right-3 top-1/2 -translate-y-1/2 text-[#94a3b8] hover:text-[#3b82f6] transition-colors">
+                <i class="fas fa-eye" id="eye_icon_tambah"></i>
+            </button>
+        </div>
+    </div>
+
+    <div class="flex gap-2 pt-2">
+        <button type="submit" class="flex-1 py-2.5 bg-gradient-to-r from-[#3b82f6] to-[#2563eb] text-white rounded-lg text-sm font-semibold hover:opacity-90 transition-opacity">
+            <i class="fas fa-save mr-1"></i> Simpan
+        </button>
+        <button type="button" onclick="closeModal('addUserModal')" class="px-4 py-2.5 bg-[#f1f5f9] text-[#64748b] rounded-lg text-sm font-semibold hover:bg-[#e2e8f0] transition-colors">
+            Batal
+        </button>
+    </div>
+</form>
+
+<script>
+function togglePasswordVisibility(inputId, iconId) {
+    const passwordInput = document.getElementById(inputId);
+    const eyeIcon = document.getElementById(iconId);
+    
+    if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        eyeIcon.classList.replace('fa-eye', 'fa-eye-slash');
+    } else {
+        passwordInput.type = 'password';
+        eyeIcon.classList.replace('fa-eye-slash', 'fa-eye');
+    }
+}
+</script>
     </div>
 </div>
 
@@ -369,10 +404,13 @@
 
 {{-- Edit Aset Modal --}}
 <div id="editAsetModal" class="modal-overlay" onclick="if(event.target===this)closeModal('editAsetModal')">
-    <div class="bg-white rounded-2xl w-full max-w-md mx-4">
-        <form method="POST" action="" class="p-6 space-y-3" enctype="multipart/form-data">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 overflow-hidden">
+        <div class="bg-gradient-to-r from-[#f59e0b] to-[#d97706] px-6 py-4 flex items-center justify-between">
+            <h3 class="text-white font-semibold text-base"><i class="fas fa-box mr-2"></i>Edit Aset</h3>
+            <button onclick="closeModal('editAsetModal')" class="text-white/80 hover:text-white text-xl">&times;</button>
+        </div>
+        <form id="editAsetForm" method="POST" action="" class="p-6 space-y-4" enctype="multipart/form-data">
             @csrf @method('PUT')
-            
             <div class="grid grid-cols-2 gap-3">
                 <div>
                     <label class="field-label">Kode Aset</label>
@@ -383,43 +421,41 @@
                     <input type="text" id="editAsetNama" name="nama_aset" class="field-input" required>
                 </div>
             </div>
-
             <div class="grid grid-cols-2 gap-3">
                 <div>
                     <label class="field-label">Kategori</label>
                     <select id="editAsetKat" name="kategori" class="field-input">
                         <option value="Elektronik">Elektronik</option>
-                        <option value="Fotografi">Logistik</option>
-                        <option value="Audio">Lainnya</option>
+                        <option value="Fotografi">Fotografi</option>
+                        <option value="Audio">Audio</option>
                     </select>
                 </div>
-                <div>
-                    <label class="field-label">Kondisi</label>
-                    <select id="editAsetKondisi" name="kondisi" class="field-input">
-                        <option value="Baik">Baik</option>
-                        <option value="Rusak Ringan">Rusak Ringan</option>
-                        <option value="Rusak Berat">Rusak Berat</option>
-                    </select>
-                </div>
-            </div>
-
-            <div class="grid grid-cols-2 gap-3">
                 <div>
                     <label class="field-label">Stok</label>
-                    <input type="number" id="editAsetStok" name="stok" class="field-input">
-                </div>
-                <div>
-                    <label class="field-label">Lokasi</label>
-                    <input type="text" id="editAsetLokasi" name="lokasi" class="field-input">
+                    <input type="number" id="editAsetStok" name="stok" class="field-input" required>
                 </div>
             </div>
-
             <div>
-                <label class="field-label">Ganti Foto (Opsional)</label>
-                <input type="file" name="foto" class="field-input text-xs" accept="image/*">
+                <label class="field-label">Lokasi</label>
+                <input type="text" id="editAsetLokasi" name="lokasi" class="field-input">
             </div>
-
-            <button type="submit" class="w-full py-2.5 bg-orange-500 text-white rounded-lg">Update Aset</button>
+            <div>
+                <label class="field-label">Kondisi</label>
+                <select id="editAsetKondisi" name="kondisi" class="field-input">
+                    <option value="Baik">Baik</option>
+                    <option value="Rusak Ringan">Rusak Ringan</option>
+                    <option value="Rusak Berat">Rusak Berat</option>
+                </select>
+            </div>
+            <div>
+                <label class="field-label">Foto Preview</label>
+                <img id="editAsetPreview" src="" class="w-20 h-20 object-cover rounded mb-2 hidden">
+                <input type="file" name="foto" class="field-input text-xs">
+            </div>
+            <div class="flex gap-2 pt-2">
+                <button type="submit" class="flex-1 py-2.5 bg-gradient-to-r from-[#f59e0b] to-[#d97706] text-white rounded-lg text-sm font-semibold">Update Aset</button>
+                <button type="button" onclick="closeModal('editAsetModal')" class="px-4 py-2.5 bg-[#f1f5f9] text-[#64748b] rounded-lg text-sm font-semibold">Batal</button>
+            </div>
         </form>
     </div>
 </div>
@@ -490,28 +526,29 @@
     // Logic Edit Aset
     function openEditAsetModal(btn, id) {
     const modal = document.getElementById('editAsetModal');
-    const form = modal.querySelector('form');
+    const form = document.getElementById('editAsetForm');
     
+    // Set URL Update
     let url = "{{ route('admin.aset.update', ':id') }}";
     form.action = url.replace(':id', id);
 
+    // Isi Data ke Input
     document.getElementById('editAsetKode').value = btn.dataset.kode; 
-    document.getElementById('editAsetNama').value = btn.dataset.nama_aset; 
+    document.getElementById('editAsetNama').value = btn.dataset.nama; 
     document.getElementById('editAsetKat').value = btn.dataset.kategori;
     document.getElementById('editAsetKondisi').value = btn.dataset.kondisi; 
     document.getElementById('editAsetStok').value = btn.dataset.stok;
     document.getElementById('editAsetLokasi').value = btn.dataset.lokasi;
 
-    // LOGIKA FOTO:
+    // Preview Foto
     const preview = document.getElementById('editAsetPreview');
     if (btn.dataset.foto) {
-        // Arahkan src ke folder storage
         preview.src = "/storage/" + btn.dataset.foto;
         preview.classList.remove('hidden');
     } else {
         preview.classList.add('hidden');
     }
-    
+
     openModal('editAsetModal');
 }
     // Logic Delete (Global)
@@ -535,5 +572,29 @@
             row.style.display = row.textContent.toLowerCase().includes(query.toLowerCase()) ? '' : 'none';
         });
     }
+
+    document.addEventListener("DOMContentLoaded", function() {
+        // Ambil sinyal tab dari session Laravel
+        const activeTab = "{{ session('active_tab') }}";
+
+        if (activeTab === 'aset') {
+            // Cari tombol tab aset di HTML kamu
+            // Sesuaikan selektor ini dengan teks atau ID tombol tab aset kamu
+            const btnAset = document.querySelector('button[onclick*="\'aset\'"]');
+            
+            if (btnAset) {
+                // Buat event palsu agar fungsi switchTab tidak error
+                const fakeEvent = { currentTarget: btnAset };
+                switchTab(fakeEvent, 'aset');
+            }
+        } else if (activeTab === 'user') {
+            const btnUser = document.querySelector('button[onclick*="\'user\'"]');
+            if (btnUser) {
+                const fakeEvent = { currentTarget: btnUser };
+                switchTab(fakeEvent, 'user');
+            }
+        }
+    });
+    
 </script>
 @endpush
