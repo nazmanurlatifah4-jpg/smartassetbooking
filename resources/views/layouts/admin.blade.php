@@ -341,5 +341,33 @@
         function closeModal(id) { document.getElementById(id).classList.remove('show'); }
     </script>
     @stack('scripts')
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+        @if(session('success'))
+            Swal.fire({
+                icon: 'success',
+                title: 'Berhasil!',
+                text: "{{ session('success') }}",
+                showConfirmButton: false,
+                timer: 2500,
+                background: 'linear-gradient(135deg, #3b82f6 0%, #1e40af 100%)', // Gradasi Biru Nexora
+                color: '#ffffff',
+                iconColor: '#facc15',
+                backdrop: `rgba(30, 64, 175, 0.4)` 
+            });
+        @endif
+
+        @if(session('error'))
+            Swal.fire({
+                icon: 'error',
+                title: 'Gagal!',
+                text: "{{ session('error') }}",
+                background: '#dc2626', 
+                color: '#ffffff',
+                iconColor: '#ffffff'
+            });
+        @endif
+    </script>
 </body>
 </html>
