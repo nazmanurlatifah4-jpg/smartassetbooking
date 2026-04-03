@@ -66,7 +66,7 @@ Route::middleware(['auth', 'role:admin'])
     Route::post  ('/denda/{denda}/lunas',[DendaController::class, 'konfirmasiLunas'])->name('denda.lunas');
     Route::put   ('/denda/{denda}',      [DendaController::class, 'update']         )->name('denda.update');
     Route::delete('/denda/{denda}',      [DendaController::class, 'destroy']         )->name('denda.destroy');
-   
+
    // Pastikan ini berada di dalam group yang memiliki prefix 'admin'
 Route::get   ('/laporan',             [LaporanController::class, 'index']     )->name('laporan');
 Route::post  ('/laporan',             [LaporanController::class, 'store']     )->name('laporan.store');
