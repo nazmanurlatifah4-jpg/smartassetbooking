@@ -37,7 +37,7 @@ class DendaController extends Controller
         $stats = [
             'aktif'           => Denda::where('status_bayar', 'Belum Lunas')->count(),
             'total_nominal'   => Denda::where('status_bayar', 'Belum Lunas')->sum('total_denda'),
-            'sudah_lunas'     => Denda::where('status_bayar', 'Lunas')->count(),
+            'sudah_bayar'     => Denda::where('status_bayar', 'Lunas')->count(),
             'total_terkumpul' => Denda::where('status_bayar', 'Lunas')->sum('total_denda'),
         ];
 
@@ -93,6 +93,16 @@ class DendaController extends Controller
 
         return redirect()->route('admin.denda')
             ->with('success', 'Data denda berhasil diperbarui!');
+    }
+
+    public function updateSettings(Request $request)
+    {
+        $request->validate([
+            'tarif_per_hari' => ['required', 'integer', 'min:0'],
+            'max_denda'      => ['nullable', 'integer', 'min:0'],
+        ]);
+
+        return redirect()->back()->with('success', 'Pengaturan tarif denda berhasil diperbarui!');
     }
 
     // ── DESTROY ───────────────────────────────────────────────────

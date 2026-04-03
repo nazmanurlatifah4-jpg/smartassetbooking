@@ -128,16 +128,24 @@
             </div>
         </div>
         <div class="px-6 pb-5 flex gap-2">
-            <button class="flex-1 py-2 rounded-full bg-[#d1fae5] text-[#065f46] text-sm font-semibold hover:bg-[#a7f3d0] transition-colors">
-                <i class="fas fa-check mr-1"></i> Setujui
-            </button>
-            <button class="flex-1 py-2 rounded-full bg-[#fecaca] text-[#991b1b] text-sm font-semibold hover:bg-[#fca5a5] transition-colors">
-                <i class="fas fa-times mr-1"></i> Tolak
-            </button>
-            <button onclick="closeModal('detailModal')" class="px-4 py-2 rounded-full bg-[#f1f5f9] text-[#64748b] text-sm font-semibold hover:bg-[#e2e8f0] transition-colors">
-                Tutup
-            </button>
-        </div>
+    <form action="{{ route('admin.transaksi.approve', $r['no']) }}" method="POST" class="flex-1">
+        @csrf
+        <button type="submit" class="w-full py-2 rounded-full bg-[#d1fae5] text-[#065f46] text-sm font-semibold hover:bg-[#a7f3d0] transition-colors">
+            <i class="fas fa-check mr-1"></i> Setujui
+        </button>
+    </form>
+
+    <form action="{{ route('admin.transaksi.reject', $r['no']) }}" method="POST" class="flex-1">
+        @csrf
+        <button type="submit" class="w-full py-2 rounded-full bg-[#fecaca] text-[#991b1b] text-sm font-semibold hover:bg-[#fca5a5] transition-colors">
+            <i class="fas fa-times mr-1"></i> Tolak
+        </button>
+    </form>
+
+    <button type="button" onclick="closeModal('detailModal')" class="px-4 py-2 rounded-full bg-[#f1f5f9] text-[#64748b] text-sm font-semibold hover:bg-[#e2e8f0] transition-colors">
+        Tutup
+    </button>
+</div>
     </div>
 </div>
 

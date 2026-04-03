@@ -62,10 +62,11 @@ Route::middleware(['auth', 'role:admin'])
     Route::delete('/transaksi/{peminjaman}',             [TransaksiController::class, 'destroy']         )->name('transaksi.destroy');
 
     // Denda 
-    Route::get   ('/denda',              [DendaController::class, 'index']         )->name('denda');
+    Route::get   ('/denda',               [DendaController::class, 'index']         )->name('denda');
     Route::post  ('/denda/{denda}/lunas',[DendaController::class, 'konfirmasiLunas'])->name('denda.lunas');
+    Route::put   ('/denda/settings',     [DendaController::class, 'updateSettings'])->name('denda.settings');
     Route::put   ('/denda/{denda}',      [DendaController::class, 'update']         )->name('denda.update');
-    Route::delete('/denda/{denda}',      [DendaController::class, 'destroy']         )->name('denda.destroy');
+    Route::delete('/denda/{denda}',      [DendaController::class, 'destroy']        )->name('denda.destroy');
 
    // Pastikan ini berada di dalam group yang memiliki prefix 'admin'
 Route::get   ('/laporan',             [LaporanController::class, 'index']     )->name('laporan');

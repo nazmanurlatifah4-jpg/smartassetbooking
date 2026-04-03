@@ -13,7 +13,7 @@ class AsetSeeder extends Seeder
      */
     public function run(): void
     {
-         $asets = [
+        $asets = [
             ['kode_aset' => 'AST-001', 'nama_aset' => 'Laptop Lenovo ThinkPad',   'kategori' => 'Elektronik',   'kondisi' => 'Baik',         'stok' => 5,  'lokasi' => 'Lab Komputer 1'],
             ['kode_aset' => 'AST-002', 'nama_aset' => 'Proyektor Epson EB-X41',   'kategori' => 'Elektronik',   'kondisi' => 'Baik',         'stok' => 3,  'lokasi' => 'Gudang AV'],
             ['kode_aset' => 'AST-003', 'nama_aset' => 'Kamera DSLR Canon 1300D',  'kategori' => 'Elektronik',   'kondisi' => 'Baik',         'stok' => 2,  'lokasi' => 'Lab Multimedia'],
