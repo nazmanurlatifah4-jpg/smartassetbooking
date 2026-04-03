@@ -188,39 +188,51 @@
             </div>
             
             <div class="flex items-center gap-2">
-                <button type="button" onclick="changeQty(${idx}, -1)" class="w-8 h-8 rounded-lg bg-white border border-[#e2e8f0] text-gray-600 hover:bg-gray-100 flex items-center justify-center text-sm font-bold shadow-sm">-</button>
-                <input type="number" id="qty-input-${idx}" class="qty-input w-12 text-center border-none bg-transparent font-bold text-sm" value="${item.jumlah}" readonly>
-                <button type="button" onclick="changeQty(${idx}, 1)" class="w-8 h-8 rounded-lg bg-white border border-[#e2e8f0] text-gray-600 hover:bg-gray-100 flex items-center justify-center text-sm font-bold shadow-sm">+</button>
-            </div>
-            
-            <button type="button" onclick="removeFromCart(${idx})" class="w-8 h-8 rounded-lg bg-red-50 text-red-500 hover:bg-red-100 flex items-center justify-center ml-2 transition-colors">
-                <i class="fas fa-times"></i>
-            </button>
-        </div>`;
+    <button type="button" 
+            onclick="changeQty(${idx}, -1)" 
+            class="w-8 h-8 rounded-lg bg-white border border-[#e2e8f0] text-gray-600 hover:bg-gray-100 flex items-center justify-center text-sm font-bold shadow-sm transition-all active:scale-95">
+        -
+    </button>
+    
+    <input type="number" 
+           id="qty-input-${idx}" 
+           class="qty-input w-12 text-center border-none bg-transparent font-bold text-sm" 
+           value="${item.jumlah}" 
+           readonly>
+    
+    <button type="button" 
+            onclick="changeQty(${idx}, 1)" 
+            class="w-8 h-8 rounded-lg bg-white border border-[#e2e8f0] text-gray-600 hover:bg-gray-100 flex items-center justify-center text-sm font-bold shadow-sm transition-all active:scale-95">
+        +
+    </button>
+</div>
+
+<button type="button" 
+        onclick="removeFromCart(${idx})" 
+        class="w-8 h-8 rounded-lg bg-red-50 text-red-500 hover:bg-red-100 flex items-center justify-center ml-2 transition-colors active:scale-90">
+    <i class="fas fa-times"></i>
+</button>
     });
     container.innerHTML = html;
 }
 
     function changeQty(idx, delta) {
-        let currentQty = parseInt(cart[idx].jumlah) || 1;
-        let newQty = currentQty + delta;
+    let currentQty = parseInt(cart[idx].jumlah) || 1;
+    let newQty = currentQty + delta;
+    
+    if (newQty >= 1 && newQty <= cart[idx].stok) {
+        cart[idx].jumlah = newQty;
+        localStorage.setItem('nexora_cart', JSON.stringify(cart));
         
-        if (newQty >= 1 && newQty <= cart[idx].stok) {
-            cart[idx].jumlah = newQty;
-            localStorage.setItem('nexora_cart', JSON.stringify(cart));
-            
-            // Perbaikan: Langsung update value input di layar tanpa nunggu render ulang full
-            const inputEl = document.getElementById(`qty-input-${idx}`);
-            if (inputEl) {
-                inputEl.value = newQty;
-            }
-            
-            // Tetap panggil renderCart untuk memastikan sinkronisasi elemen lain (opsional tapi aman)
-            renderCart(); 
-        } else if (newQty > cart[idx].stok) {
-            alert('Stok tidak mencukupi!');
+        // UPDATE LANGSUNG KE LAYAR (INI KUNCINYA)
+        const inputEl = document.getElementById(`qty-input-${idx}`);
+        if (inputEl) {
+            inputEl.value = newQty;
         }
+    } else if (newQty > cart[idx].stok) {
+        alert('Stok tidak mencukupi!');
     }
+}
 
     function setQty(idx, val) {
         cart[idx].jumlah = Math.max(1, Math.min(cart[idx].stok, parseInt(val) || 1));

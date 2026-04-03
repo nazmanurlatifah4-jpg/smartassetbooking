@@ -155,14 +155,20 @@
                 <span class="px-2 py-0.5 bg-[#fed7aa] text-[#c2410c] rounded-full text-xs font-semibold">Menunggu</span>
             </div>
         </div>
+
         <div class="flex gap-2 mt-4">
     <form action="{{ route('admin.transaksi.approve', $p->id) }}" method="POST" class="flex-1">
         @csrf
         <button type="submit" onclick="return confirm('Setujui peminjaman ini?')" 
             class="w-full bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg font-semibold transition-all shadow-sm">
+        <div class="px-6 pb-5 flex gap-2">
+    <form action="{{ route('admin.transaksi.approve', $p->id) }}" method="POST" class="flex-1">
+        @csrf
+        <button type="submit" class="w-full py-2 rounded-full bg-[#d1fae5] text-[#065f46] text-sm font-semibold hover:bg-[#a7f3d0] transition-colors">
             <i class="fas fa-check mr-1"></i> Setujui
         </button>
     </form>
+
 
     <form action="{{ route('admin.transaksi.reject', $p->id) }}" method="POST">
     @csrf
@@ -175,6 +181,18 @@
         </button>
     </div>
 </form>
+
+    <form action="{{ route('admin.transaksi.reject', $p->id) }}" method="POST" class="flex-1">
+        @csrf
+        <button type="submit" class="w-full py-2 rounded-full bg-[#fecaca] text-[#991b1b] text-sm font-semibold hover:bg-[#fca5a5] transition-colors">
+            <i class="fas fa-times mr-1"></i> Tolak
+        </button>
+    </form>
+
+    <button type="button" onclick="closeModal('detailModal')" class="px-4 py-2 rounded-full bg-[#f1f5f9] text-[#64748b] text-sm font-semibold hover:bg-[#e2e8f0] transition-colors">
+        Tutup
+    </button>
+>>>>>>> 629c3b93746c4db7dc4d99dd101f6be6e3ca02f2
 </div>
     </div>
 </div>

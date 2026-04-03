@@ -83,8 +83,7 @@ class TransaksiController extends Controller
                 'user_id'         => $data['user_id'],
                 'aset_id'         => $data['aset_id'],
                 'tanggal_pinjam'  => $data['tanggal_pinjam'],
-                'tanggal_pengajuan' => $data['tanggal_pinjam'],
-                'tanggal_kembali' => $data['tanggal_kembali'],
+                'tanggal_kembali' => $data['tanggal_kembali'], // Sesuai DB
                 'keperluan'       => $data['keperluan'],
                 'status'          => 'Disetujui', 
                 'tanggal_disetujui' => now()->toDateString(),
