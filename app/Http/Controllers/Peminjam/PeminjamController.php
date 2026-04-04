@@ -64,7 +64,7 @@ class PeminjamController extends Controller
             'tanggal_pengajuan' => ['required', 'date'],
             'tanggal_kembali'   => ['required', 'date', 'after_or_equal:tanggal_pengajuan'],
             'keperluan'         => ['nullable', 'string', 'max:500'],
-            'cart'              => ['required', 'string'], // JSON dari localStorage
+            'cart'              => ['required', 'string'], 
         ]);
 
         $cart = json_decode($request->cart, true);
@@ -94,7 +94,7 @@ class PeminjamController extends Controller
                     'tanggal_pengajuan' => $request->tanggal_pengajuan,
                     'tanggal_kembali'   => $request->tanggal_kembali,
                     'keperluan'         => $request->keperluan,
-                    'status'            => 'Menunggu', // enum: Menunggu
+                    'status'            => 'Menunggu', 
                 ]);
 
                 // Kirim notifikasi ke peminjam

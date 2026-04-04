@@ -22,13 +22,13 @@ class UserSeeder extends Seeder
             'role'     => 'admin',
         ]);
 
-        // ── Manajemen ─────────────────────────────────────────
         User::create([
-            'nama'     => 'Dewi Rahayu',
-            'email'    => 'manajemen@nexora.sch.id',
-            'password' => Hash::make('password'),
+            'nama'     => 'Nadin',
+            'email'    => 'nadin@sch.id',
+            'password' => Hash::make('password'),   // bcrypt otomatis
             'role'     => 'admin',
         ]);
+
 
         // ── Peminjam (Siswa) ──────────────────────────────────
         $peminjam = [

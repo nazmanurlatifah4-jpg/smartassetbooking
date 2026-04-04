@@ -88,7 +88,7 @@
             <a href="#testimoni" class="block text-sm text-[#475569] hover:text-[#3b82f6] py-1">Testimoni</a>
             <a href="#faq" class="block text-sm text-[#475569] hover:text-[#3b82f6] py-1">FAQ</a>
             <a href="{{ route('login') }}" class="px-6 py-2 bg-[#3b82f6] text-white rounded-full font-semibold">
-             Mulai Sekarang
+            Mulai Sekarang
             </a>
         </div>
     </nav>
