@@ -15,18 +15,20 @@ class RedirectIfAuthenticated
      *
      * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
      */
-    public function handle(Request $request, Closure $next, string ...$guards): Response
+   public function handle(Request $request, Closure $next, string ...$guards): Response
 {
     $guards = empty($guards) ? [null] : $guards;
 
     foreach ($guards as $guard) {
         if (Auth::guard($guard)->check()) {
-            // CEK ROLE USER DISINI
-            $role = Auth::user()->role;
+            $user = Auth::user();
 
-            if ($role === 'admin') {
-                return redirect()->route('admin.dashboard'); // Sesuaikan nama rutenya
-            } // Jika bukan admin (peminjam)
+            // Gunakan match agar lebih bersih dan mudah dibaca
+            return match($user->role) {
+                'admin'    => redirect()->route('admin.dashboard'),
+                'peminjam' => redirect()->route('peminjam.dashboard'),
+                default    => redirect('/'), // Balik ke landing page kalau role gak jelas
+            };
         }
     }
 

@@ -49,5 +49,7 @@ return view('admin.dashboard', compact(
     'selesaiHariIni', 'peminjamanTerbaru', 
     'statCards' 
 ));
+
     }
+    
 }

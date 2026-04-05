@@ -81,7 +81,7 @@
                             <td class="p-3 text-xs text-[#1e293b] border-b border-[#f1f5f9] font-medium">{{ $u->nama }}</td>
                             <td class="p-3 text-xs text-[#475569] border-b border-[#f1f5f9] hidden md:table-cell">{{ $u->email }}</td>
                             <td class="p-3 border-b border-[#f1f5f9] hidden sm:table-cell">
-                                <span class="px-2 py-0.5 rounded-full text-xs font-semibold {{ $u->role==='Manajemen' ? 'bg-[#e9d5ff] text-[#7e22ce]' : 'bg-[#dbeafe] text-[#1d4ed8]' }}">{{ $u->role}}</span>
+        
                             </td>
                             <td class="p-3 text-xs text-[#475569] border-b border-[#f1f5f9] hidden lg:table-cell">{{ $u->jurusan }}</td>
                             <td class="p-3 border-b border-[#f1f5f9]">
@@ -183,7 +183,10 @@
         <td class="p-3 text-xs text-[#475569] border-b border-[#f1f5f9] hidden md:table-cell">{{ $a->kondisi }}</td>
         
         {{-- 5. Stok --}}
-        <td class="p-3 text-xs text-[#475569] border-b border-[#f1f5f9] hidden md:table-cell">{{ $a->stok }}</td>
+        <td class="p-3 text-xs text-[#475569] border-b border-[#f1f5f9] hidden md:table-cell">
+            <span class="font-bold text-[#3b82f6]">{{ $a->stokTersedia() }}</span> 
+            <span class="text-[10px] text-gray-400">/ {{ $a->stok }} total</span>
+        </td>
         
         {{-- 6. Status --}}
         <td class="p-3 border-b border-[#f1f5f9]">
@@ -253,7 +256,6 @@
             <label class="field-label">Role</label>
             <select name="role" class="field-input">
                 <option value="peminjam">Peminjam</option>
-                <option value="manajemen">Manajemen</option>
                 <option value="admin">Admin</option>
             </select>
         </div>
@@ -327,7 +329,6 @@ function togglePasswordVisibility(inputId, iconId) {
                     <label class="field-label">Role</label>
                     <select id="editUserRole" name="role" class="field-input">
                         <option value="peminjam">Peminjam</option>
-                        <option value="manajemen">Manajemen</option>
                         <option value="admin">Admin</option>
                     </select>
                 </div>

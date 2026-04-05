@@ -13,6 +13,7 @@ use App\Models\Notifikasi;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Carbon;
 
 class TransaksiController extends Controller
 {
@@ -43,7 +44,7 @@ class TransaksiController extends Controller
         'menunggu'  => Peminjaman::where('status', 'Menunggu')->count(),
         'aktif'     => Peminjaman::where('status', 'Disetujui')->count(),
         'terlambat' => Peminjaman::where('status', 'Disetujui')
-                        ->where('tanggal_kembali', '<', now()->toDateString())
+                        ->where('tanggal_kembali', '<', Carbon::now()->toDateString())
                         ->count(),
     ];
 
@@ -66,6 +67,7 @@ class TransaksiController extends Controller
         $data = $request->validate([
             'user_id'         => ['required', 'exists:users,id'],
             'aset_id'         => ['required', 'exists:asets,id'],
+            'jumlah'          => ['required', 'integer', 'min:1'],
             'tanggal_pinjam'  => ['required', 'date'],
             'tanggal_kembali' => ['required', 'date', 'after_or_equal:tanggal_pinjam'],
             'keperluan'       => ['nullable', 'string', 'max:500'],
@@ -73,45 +75,32 @@ class TransaksiController extends Controller
 
         $aset = Aset::findOrFail($data['aset_id']);
 
-        if ($aset->stok < 1) { 
-        return redirect()->back()->with('error', 'Stok aset tidak tersedia!');
-    }
+        if ($aset->stokTersedia() < $data['jumlah']) { 
+            return redirect()->back()->with('error', "Stok aset '{$aset->nama_aset}' tidak mencukupi!");
+        }
 
         DB::transaction(function () use ($data, $aset) {
 
             $peminjaman = Peminjaman::create([
                 'user_id'         => $data['user_id'],
                 'aset_id'         => $data['aset_id'],
+                'jumlah'          => $data['jumlah'],
                 'tanggal_pinjam'  => $data['tanggal_pinjam'],
-                'tanggal_kembali' => $data['tanggal_kembali'], // Sesuai DB
+                'tanggal_kembali' => $data['tanggal_kembali'],
                 'keperluan'       => $data['keperluan'],
                 'status'          => 'Disetujui', 
-                'tanggal_disetujui' => now()->toDateString(),
+                'tanggal_disetujui' => Carbon::now(),
             ]);
 
-            // Buat record verifikasi
             Verifikasi::create([
                 'peminjaman_id' => $peminjaman->id,
                 'admin_id'      => auth()->id(),
                 'status'        => 'Disetujui',
-                'tanggal'       => now()->toDateString(),
+                'tanggal'       => Carbon::now(),
                 'catatan'       => 'Dibuat langsung oleh admin.',
             ]);
 
-            // Kurangi stok aset
-            $aset->decrement('stok');
-
-            // Buat record verifikasi
-            Verifikasi::create([
-            'peminjaman_id' => $peminjaman->id,
-            'admin_id'      => auth()->id(),
-            'status'        => 'Disetujui',
-            'tanggal'       => now()->toDateString(),
-            'catatan'       => 'Dibuat langsung oleh admin.',
-        ]);
-
-            // Kirim notifikasi ke peminjam
-                Notifikasi::kirim(
+            Notifikasi::kirim(
                 $peminjaman->user_id,
                 'Peminjaman Disetujui',
                 'Peminjaman ' . $aset->nama_aset . ' telah disetujui. Silakan ambil aset.'
@@ -123,59 +112,57 @@ class TransaksiController extends Controller
 
 public function approve(Request $request, Peminjaman $peminjaman)
 {
-    // 1. Cek stok di tabel asets (panggil kolom 'stok')
-    if ($peminjaman->aset->stok < 1) {
-        return redirect()->back()->with('error', 'Maaf, stok aset sudah habis!');
+    if ($peminjaman->status !== 'Menunggu') {
+        return redirect()->back()->with('error', 'Transaksi ini sudah diproses.');
     }
 
-    DB::transaction(function () use ($peminjaman, $request) {
-        // 2. Update status peminjaman
+    DB::transaction(function () use ($peminjaman) {
         $peminjaman->update([
             'status' => 'Disetujui',
-            'tanggal_disetujui' => now(),
+            'tanggal_disetujui' => Carbon::now(),
         ]);
 
-        // 3. KURANGI STOK ASET (PENTING!)
-        $peminjaman->aset->decrement('stok', 1);
-
-        // 4. Catat Verifikasi
         Verifikasi::create([
             'peminjaman_id' => $peminjaman->id,
             'admin_id'      => auth()->id(),
             'status'        => 'Disetujui',
-            'tanggal'       => now(),
+            'tanggal'       => Carbon::now(),
+        ]);
+
+        Notifikasi::create([
+            'user_id'    => $peminjaman->user_id,
+            'judul'      => 'Peminjaman Disetujui',
+            'pesan'      => 'Aset ' . $peminjaman->aset->nama_aset . ' sudah disetujui, silakan diambil.',
+            'tanda_baca' => 'Belum Dibaca'
         ]);
     });
 
-    return redirect()->back()->with('success', 'Peminjaman disetujui & stok otomatis berkurang!');
+    return redirect()->back()->with('success', 'Peminjaman disetujui!');
 }
 
 // ── REJECT ────────────────────────────────────────────────────
 public function reject(Request $request, Peminjaman $peminjaman)
 {
-    // Cek status biar gak double proses
     if ($peminjaman->status !== 'Menunggu') {
-        return redirect()->back()->with('error', 'Transaksi ini sudah diproses sebelumnya.');
+        return redirect()->back()->with('error', 'Transaksi ini sudah diproses.');
     }
 
     DB::transaction(function () use ($peminjaman, $request) {
-        // 1. Update status jadi Ditolak
         $peminjaman->update([
             'status' => 'Ditolak',
             'catatan' => $request->catatan ?? 'Ditolak oleh admin.'
         ]);
 
-        // 2. Buat Verifikasi (agar muncul di history)
         Verifikasi::create([
             'peminjaman_id' => $peminjaman->id,
             'admin_id'      => auth()->id(),
             'status'        => 'Ditolak',
-            'tanggal'       => now()->toDateString(),
+            'tanggal'       => Carbon::now(),
             'catatan'       => $request->catatan,
         ]);
     });
 
-    return redirect()->back()->with('success', 'Peminjaman berhasil ditolak.');
+    return redirect()->back()->with('success', 'Peminjaman ditolak & stok dikembalikan.');
 }
 
 // ── KONFIRMASI KEMBALI ────────────────────────────────────────
@@ -211,7 +198,8 @@ public function reject(Request $request, Peminjaman $peminjaman)
             // Update status peminjaman
             $peminjaman->update(['status' => 'Selesai']);
 
-            $peminjaman->aset->increment('stok', 1);
+            // Kembalikan stok (Otomatis ditangani oleh Aset->stokTersedia() sekarang)
+            // $peminjaman->aset->increment('stok', 1);
 
             // Cek apakah perlu denda
             $terlambat     = $peminjaman->isTerlambat();

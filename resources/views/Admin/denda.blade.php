@@ -33,16 +33,18 @@
     </button>
 </div>
 
+@if($stats['terlambat_count'] > 0)
 {{-- Alert Banner --}}
 <div class="bg-[#fef3c7] border border-[#fde68a] rounded-xl p-4 mb-6 flex items-start gap-3">
     <div class="w-8 h-8 rounded-full bg-[#fde68a] flex items-center justify-center text-[#d97706] flex-shrink-0 mt-0.5">
         <i class="fas fa-exclamation-triangle text-sm"></i>
     </div>
     <div>
-        <p class="text-sm font-semibold text-[#92400e]">Perhatian: Ada 3 peminjaman yang melewati batas waktu pengembalian!</p>
+        <p class="text-sm font-semibold text-[#92400e]">Perhatian: Ada {{ $stats['terlambat_count'] }} peminjaman yang melewati batas waktu pengembalian!</p>
         <p class="text-xs text-[#b45309] mt-0.5">Segera tindak lanjuti denda agar tidak menumpuk. Notifikasi otomatis sudah dikirim ke peminjam.</p>
     </div>
 </div>
+@endif
 
 {{-- Stats Cards --}}
 <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
@@ -98,10 +100,10 @@
                     <tr class="hover:bg-[#f8fafc] transition-colors" data-status="{{ $d->status === 'belum_bayar' ? 'Belum Bayar' : 'Sudah Bayar' }}">
                         <td class="p-3 text-xs text-[#475569] border-b border-[#f1f5f9]">{{ $dendas->firstItem() + $loop->index }}</td>
                         <td class="p-3 border-b border-[#f1f5f9]">
-                            <div class="text-xs font-medium text-[#1e293b]">{{ $d->peminjaman->user->name }}</div>
-                            <div class="text-[10px] text-[#94a3b8]">{{ $d->peminjaman->user->jurusan }}</div>
+                            <div class="text-xs font-medium text-[#1e293b]">{{ $d->peminjaman->user->nama ?? 'User' }}</div>
+                            <div class="text-[10px] text-[#94a3b8]">{{ $d->peminjaman->user->role ?? '-' }}</div>
                         </td>
-                        <td class="p-3 text-xs text-[#475569] border-b border-[#f1f5f9] hidden sm:table-cell">{{ $d->peminjaman->aset->nama }}</td>
+                        <td class="p-3 text-xs text-[#475569] border-b border-[#f1f5f9] hidden sm:table-cell">{{ $d->peminjaman->aset->nama_aset ?? 'Aset' }}</td>
                         <td class="p-3 text-xs text-[#475569] border-b border-[#f1f5f9] hidden md:table-cell">
                             {{ $d->peminjaman->tanggal_kembali_rencana->format('d M Y') }}
                         </td>
@@ -117,13 +119,17 @@
                             @endif
                         </td>
                         <td class="p-3 border-b border-[#f1f5f9]">
-                            <div class="flex gap-1">
-                                <button onclick="openDendaDetail('{{ $d->peminjaman->user->name }}','{{ $d->peminjaman->aset->nama }}','{{ $d->total_format }}','{{ $d->hari_terlambat }}','{{ $d->status === "belum_bayar" ? "Belum Bayar" : "Sudah Bayar" }}')"
+                            <div class="flex gap-1" @php
+                                $uNama = addslashes($d->peminjaman->user->nama ?? 'User');
+                                $aNama = addslashes($d->peminjaman->aset->nama_aset ?? 'Aset');
+                                $statusLbl = $d->status === 'belum_bayar' ? 'Belum Bayar' : 'Sudah Bayar';
+                            @endphp>
+                                <button onclick="openDendaDetail('{{ $uNama }}','{{ $aNama }}','{{ $d->total_format }}','{{ $d->hari_terlambat }}','{{ $statusLbl }}')"
                                     class="w-7 h-7 rounded-md bg-[#dbeafe] text-[#3b82f6] hover:bg-[#3b82f6] hover:text-white transition-all flex items-center justify-center text-xs" title="Detail">
                                     <i class="fas fa-eye"></i>
                                 </button>
                                 @if($d->status === 'belum_bayar')
-                                <button onclick="openBayarModal({{ $d->id }})"
+                                <button onclick="openBayarModal('{{ $d->id }}')"
                                     class="w-7 h-7 rounded-md bg-[#d1fae5] text-[#10b981] hover:bg-[#10b981] hover:text-white transition-all flex items-center justify-center text-xs" title="Konfirmasi Bayar">
                                     <i class="fas fa-check"></i>
                                 </button>

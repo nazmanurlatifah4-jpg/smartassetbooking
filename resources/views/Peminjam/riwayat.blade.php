@@ -92,7 +92,7 @@
                     </td>
                     {{-- kolom nama_aset --}}
                     <td class="p-3 text-xs md:text-sm text-gray-600 border-b border-gray-100 font-medium">{{ $r->aset->nama_aset }}</td>
-                    <td class="p-3 text-xs md:text-sm text-gray-600 border-b border-gray-100 hidden sm:table-cell">1</td>
+                    <td class="p-3 text-xs md:text-sm text-gray-600 border-b border-gray-100 hidden sm:table-cell">{{ $r->jumlah }}</td>
                     {{-- kolom tanggal_pengajuan --}}
                     <td class="p-3 text-xs md:text-sm text-gray-600 border-b border-gray-100">{{ $r->tanggal_pengajuan->format('d M Y') }}</td>
                     <td class="p-3 text-xs md:text-sm text-gray-600 border-b border-gray-100 hidden md:table-cell">

@@ -105,64 +105,57 @@
 
     <div class="flex gap-3 sm:gap-4 md:gap-5 items-center relative">
         {{-- Notification Bell --}}
-        <div class="relative">
-            <div onclick="toggleNotification()" class="cursor-pointer text-[#64748b] hover:text-[#3b82f6] text-lg sm:text-xl relative">
-                <i class="fas fa-bell"></i>
-                @php $notifCount = auth()->user()->notifikasi()->where('tanda_baca','Belum Dibaca')->count(); @endphp
-                @if($notifCount > 0)
-                <span id="notifBadge" class="absolute -top-1 -right-1 bg-[#ef4444] text-white text-[10px] px-1.5 py-0.5 rounded-full leading-none">
-                    {{ $notifCount > 9 ? '9+' : $notifCount }}
-                </span>
-                @endif
-            </div>
-            <div id="notificationDropdown" class="notification-dropdown">
-                <div class="notification-header">
-                    <h3>Notifikasi</h3>
-                    <span onclick="markAllAsRead()">Tandai sudah dibaca</span>
-                </div>
-                <div class="notification-list">
-                    @forelse(auth()->user()->notifikasi()->latest('tanggal_kirim')->limit(5)->get() as $notif)
-                    <div class="notification-item {{ $notif->tanda_baca === 'Belum Dibaca' ? 'unread' : '' }}" onclick="markAsRead(this, {{ $notif->id }})">
-                        <div class="notification-item-title">{{ $notif->judul }}</div>
-                        <div class="notification-item-desc">{{ $notif->pesan }}</div>
-                        <div class="notification-item-time">{{ $notif->tanggal_kirim->diffForHumans() }}</div>
-                    </div>
-                    @empty
-                    <div class="notification-item">
-                        <div class="notification-item-desc text-center py-4">Tidak ada notifikasi</div>
-                    </div>
-                    @endforelse
-                </div>
-                <div class="notification-footer">
-                    <a href="#">Lihat semua notifikasi</a>
-                </div>
-            </div>
-        </div>
-
-        {{-- Cart Icon (hanya di halaman data aset) --}}
-        @hasSection('show-cart')
-        <div class="relative">
-            <div onclick="goToKeranjang()" class="cursor-pointer text-[#64748b] hover:text-[#3b82f6] text-lg sm:text-xl relative">
-                <i class="fas fa-shopping-cart"></i>
-                <span class="absolute -top-1 -right-1 bg-[#94b910] text-white text-[10px] px-1.5 py-0.5 rounded-full leading-none" id="cartCount">0</span>
-            </div>
-        </div>
+<div class="relative">
+    <div onclick="toggleNotification()" class="cursor-pointer text-[#64748b] hover:text-[#3b82f6] text-lg sm:text-xl relative">
+        <i class="fas fa-bell"></i>
+        @php $notifCount = auth()->user()->notifikasi()->where('tanda_baca','Belum Dibaca')->count(); @endphp
+        @if($notifCount > 0)
+        <span id="notifBadge" class="absolute -top-1 -right-1 bg-[#ef4444] text-white text-[10px] px-1.5 py-0.5 rounded-full leading-none">
+            {{ $notifCount > 9 ? '9+' : $notifCount }}
+        </span>
         @endif
-
-        {{-- User Icon --}}
-        <div class="relative">
-            <div onclick="toggleUserDropdown()" class="cursor-pointer text-[#64748b] hover:text-[#3b82f6] text-lg sm:text-xl">
-                <i class="fas fa-user-circle"></i>
+    </div>
+    
+    {{-- NOTIFICATION DROPDOWN --}}
+    <div id="notificationDropdown" class="notification-dropdown">
+        <div class="notification-header">
+            <h3>Notifikasi</h3>
+            <span onclick="markAllAsRead()">Tandai sudah dibaca</span>
+        </div>
+        <div class="notification-list">
+            @forelse(auth()->user()->notifikasi()->latest('tanggal_kirim')->limit(5)->get() as $notif)
+            <div class="notification-item {{ $notif->tanda_baca === 'Belum Dibaca' ? 'unread' : '' }}" 
+                 data-id="{{ $notif->id }}"
+                 onclick="markAsRead(this, {{ $notif->id }})">
+                <div class="notification-item-title">{{ $notif->judul }}</div>
+                <div class="notification-item-desc">{{ $notif->pesan }}</div>
+                <div class="notification-item-time">{{ $notif->tanggal_kirim->diffForHumans() }}</div>
             </div>
+            @empty
+            <div class="notification-item">
+                <div class="notification-item-desc text-center py-4">Tidak ada notifikasi</div>
+            </div>
+            @endforelse
+        </div>
+        <div class="notification-footer">
+            <a href="#">Lihat semua notifikasi</a>
+        </div>
+    </div>
+</div>        {{-- User Icon --}}
+        <div class="relative">
+            <div onclick="toggleUserDropdown()" class="cursor-pointer flex items-center gap-2 text-[#64748b] hover:text-[#3b82f6] transition-colors">
+                    <div class="w-8 h-8 rounded-full bg-gradient-to-br from-[#3b82f6] to-[#2563eb] flex items-center justify-center text-white text-sm font-bold">{{ substr(auth()->user()->nama, 0, 1) }}</div>
+                    <span class="text-sm font-medium hidden sm:block">{{ auth()->user()->nama }}</span>
+                    <i class="fas fa-chevron-down text-xs hidden sm:block"></i>
+                </div>
+
             <div id="userDropdown" class="user-dropdown">
                 <div class="px-4 py-3 border-b border-[#e2e8f0]">
                     {{-- kolom 'nama' sesuai migration --}}
                     <p class="text-sm font-semibold text-[#1e293b]">{{ auth()->user()->nama }}</p>
                     <p class="text-xs text-[#64748b]">{{ auth()->user()->kelas ?? auth()->user()->jurusan }}</p>
                 </div>
-                <div class="user-dropdown-item">
-                    <i class="fas fa-user"></i><span>Profil Saya</span>
-                </div>
+        
                 <div class="user-dropdown-divider"></div>
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
@@ -179,15 +172,27 @@
 <div id="overlay" class="hidden fixed inset-0 bg-black/50 z-40" onclick="toggleSidebar()"></div>
 
 {{-- ===== LAYOUT ===== --}}
-<div class="flex min-h-[calc(100vh-70px)]">
+<div class="flex min-h-[calc(100vh-64px)]">
 
-    {{-- ===== SIDEBAR ===== --}}
-    <aside id="sidebar" class="sidebar-mobile fixed md:sticky top-0 md:top-[73px] left-[-260px] md:left-0 w-[260px] h-screen md:h-[calc(100vh-73px)] bg-gradient-to-b from-[#3b82f6] to-[#2563eb] text-white py-6 md:py-8 overflow-y-auto z-50 transition-all duration-300">
-        <div class="md:hidden flex justify-end px-4 mb-4">
-            <button onclick="toggleSidebar()" class="text-white/80 hover:text-white text-xl">
-                <i class="fas fa-times"></i>
-            </button>
-        </div>
+    <!-- Sidebar -->
+        <aside id="sidebar" class="sidebar-mobile fixed md:sticky top-0 md:top-[64px] left-[-260px] md:left-0 w-[260px] h-screen md:h-[calc(100vh-64px)] bg-gradient-to-b from-[#3b82f6] to-[#2563eb] text-white py-6 overflow-y-auto z-50 transition-all duration-300 flex-shrink-0">
+            <div class="md:hidden flex justify-end px-4 mb-4">
+                <button onclick="toggleSidebar()" class="text-white/80 hover:text-white text-xl"><i class="fas fa-times"></i></button>
+            </div>
+
+     <!-- User Info -->
+            <div class="px-4 mb-6">
+                <div class="flex items-center gap-3 bg-white/10 rounded-xl p-3">
+                    <div class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center text-lg font-bold">{{ substr(auth()->user()->nama, 0, 1) }}</div>
+                    <div>
+                        <p class="text-sm font-semibold">{{ auth()->user()->nama }}</p>
+                        <p class="text-xs text-white/70">Peminjam</p>
+                    </div>
+                </div>
+            </div>
+
+            <p class="px-4 text-xs font-semibold text-white/50 uppercase tracking-wider mb-2">Menu Utama</p>
+            <ul class="px-3 space-y-1">
 
         <ul class="px-3 space-y-1">
             @php
@@ -212,15 +217,16 @@
             @endforeach
         </ul>
 
-        <div class="px-3 mt-8">
-            <form method="POST" action="{{ route('logout') }}">
-                @csrf
-                <button type="submit" class="w-full flex items-center gap-3 px-3 py-2.5 justify-center bg-[rgba(239,68,68,0.2)] text-white rounded-lg text-sm hover:bg-[rgba(239,68,68,0.3)] transition-all">
-                    <i class="fas fa-sign-out-alt"></i><span>Logout</span>
-                </button>
-            </form>
+        <div class="px-3 mt-6 pt-4 border-t border-white/20">
+                <form method="POST" action="{{ route('logout') }}">
+                    @csrf
+                    <button type="submit" class="w-full flex items-center gap-3 px-3 py-2.5 justify-center bg-white/10 text-white rounded-lg text-sm hover:bg-red-500/30 transition-all">
+                        <i class="fas fa-sign-out-alt"></i> <span>Logout</span>
+                    </button>
+                </form>
         </div>
     </aside>
+
 
     {{-- ===== MAIN CONTENT ===== --}}
     <main class="flex-1 p-4 sm:p-5 md:p-6 lg:p-8 overflow-y-auto">
@@ -272,15 +278,125 @@
                 © {{ date('Y') }} Smart Asset Booking | Developed by Nexora Web
             </div>
         </footer>
-    </main>
+    </main> 
+    <!-- Right Sidebar (xl only) - Aktivitas Peminjam -->
+<aside class="right-sidebar-hide hidden xl:block w-[220px] p-5 bg-white border-l border-[#e2e8f0] sticky top-[64px] h-[calc(100vh-64px)] overflow-y-auto flex-shrink-0">
+    {{-- Section Aktivitas Terbaru --}}
+    <div class="mb-6">
+        <p class="text-sm font-semibold text-[#1e293b] mb-3 flex items-center gap-2">
+            <i class="fas fa-history text-[#3b82f6]"></i> Aktivitas Saya
+        </p>
+        
+        @php
+            // Mengambil aktivitas peminjaman khusus user ini
+            $recentActivities = \App\Models\Peminjaman::with('aset')
+                                ->where('user_id', auth()->id())
+                                ->latest()
+                                ->take(5)
+                                ->get();
+        @endphp
 
-    {{-- Right Sidebar (xl only) --}}
-    @yield('right-sidebar')
+        @forelse($recentActivities as $activity)
+            @php
+                $bgColor = 'bg-blue-50';
+                $borderColor = 'border-blue-400';
+                $label = 'Dipinjam';
+                $icon = 'fa-arrow-up';
+
+                // Logika Status untuk Peminjam
+                if($activity->status == 'Terlambat') {
+                    $bgColor = 'bg-rose-50';
+                    $borderColor = 'border-rose-500';
+                    $label = 'Terlambat!';
+                    $icon = 'fa-exclamation-triangle';
+                } elseif($activity->status == 'Selesai') {
+                    $bgColor = 'bg-emerald-50';
+                    $borderColor = 'border-emerald-500';
+                    $label = 'Dikembalikan';
+                    $icon = 'fa-check-circle';
+                } elseif($activity->status == 'Proses') {
+                    $bgColor = 'bg-amber-50';
+                    $borderColor = 'border-amber-400';
+                    $label = 'Menunggu';
+                    $icon = 'fa-clock';
+                }
+            @endphp
+            
+            <div class="p-3 {{ $bgColor }} rounded-lg mb-3 border-l-4 {{ $borderColor }} shadow-sm transition-transform hover:scale-[1.02]">
+                <div class="flex justify-between items-start mb-1">
+                    <p class="text-[9px] font-bold uppercase tracking-wider text-slate-500">{{ $label }}</p>
+                    <i class="fas {{ $icon }} text-[10px] {{ str_replace('border-', 'text-', $borderColor) }}"></i>
+                </div>
+                <p class="text-xs font-bold text-[#1e293b] leading-tight">{{ $activity->aset->nama_aset ?? 'Aset' }}</p>
+                <p class="text-[10px] text-[#64748b] mt-0.5 italic">Kode: {{ $activity->aset->kode_aset ?? '-' }}</p>
+                <span class="text-[9px] text-[#94a3b8] block mt-1">
+                    <i class="far fa-clock"></i> {{ $activity->updated_at->diffForHumans() }}
+                </span>
+            </div>
+        @empty
+            <div class="text-center py-6">
+                <i class="fas fa-box-open text-slate-200 text-3xl mb-2"></i>
+                <p class="text-xs text-slate-400 italic">Belum ada aktivitas</p>
+            </div>
+        @endforelse
+    </div>
+
+    {{-- Section Insight Peminjam --}}
+    <div>
+        <p class="text-sm font-semibold text-[#1e293b] mb-3 flex items-center gap-2">
+            <i class="fas fa-chart-pie text-[#3b82f6]"></i> Statistik Saya
+        </p>
+        
+        @php
+            $totalPinjam = \App\Models\Peminjaman::where('user_id', auth()->id())->count();
+            $totalSelesai = \App\Models\Peminjaman::where('user_id', auth()->id())->where('status', 'Selesai')->count();
+            $totalTerlambat = \App\Models\Peminjaman::where('user_id', auth()->id())->where('status', 'Terlambat')->count();
+            
+            $rate = $totalPinjam > 0 ? round(($totalSelesai / $totalPinjam) * 100) : 0;
+            
+            $favorit = \App\Models\Peminjaman::where('user_id', auth()->id())
+                        ->select('aset_id', \DB::raw('count(*) as total'))
+                        ->groupBy('aset_id')
+                        ->orderBy('total', 'desc')
+                        ->with('aset')
+                        ->first();
+        @endphp
+
+        <div class="p-3 bg-white border border-[#e2e8f0] rounded-lg mb-3 shadow-sm">
+            <p class="text-[10px] text-[#64748b] uppercase font-bold mb-1">Skor Kepatuhan</p>
+            <div class="flex items-end gap-1">
+                <div class="text-2xl font-black text-[#3b82f6]">{{ $rate }}%</div>
+                <p class="text-[9px] text-[#94a3b8] mb-1">Tepat Waktu</p>
+            </div>
+            <div class="w-full bg-[#f1f5f9] rounded-full h-1.5 mt-2">
+                <div class="bg-gradient-to-r from-[#3b82f6] to-[#60a5fa] h-1.5 rounded-full" style="width: {{ $rate }}%"></div>
+            </div>
+        </div>
+
+        <div class="p-3 bg-white border border-[#e2e8f0] rounded-lg shadow-sm">
+            <p class="text-[10px] text-[#64748b] uppercase font-bold">Paling Sering Kamu Pinjam</p>
+            @if($favorit)
+                <p class="text-xs font-bold text-[#1e293b] mt-1">{{ $favorit->aset->nama_aset }}</p>
+                <div class="flex items-center gap-2 mt-2">
+                    <span class="text-[10px] bg-blue-100 text-blue-600 px-2 py-0.5 rounded-full font-bold">
+                        {{ $favorit->total }}x Pinjam
+                    </span>
+                </div>
+            @else
+                <p class="text-[10px] text-slate-400 italic mt-1">Belum ada data favorit</p>
+            @endif
+        </div>
+
+        @if($totalTerlambat > 0)
+        <div class="mt-3 p-2 bg-rose-100 border border-rose-200 rounded-md flex items-center gap-2">
+            <i class="fas fa-exclamation-circle text-rose-500 text-xs"></i>
+            <p class="text-[10px] text-rose-700 font-medium">Ada {{ $totalTerlambat }} riwayat terlambat</p>
+        </div>
+        @endif
+    </div>
+</aside>
+
 </div>
-
-{{-- Toast --}}
-<div class="toast" id="toast"></div>
-
 <script>
     function toggleSidebar() {
         const sidebar = document.getElementById('sidebar');
@@ -292,51 +408,102 @@
         }
     }
     function toggleNotification() {
-        document.getElementById('notificationDropdown').classList.toggle('show');
-        document.getElementById('userDropdown')?.classList.remove('show');
-    }
-    function toggleUserDropdown() {
-        document.getElementById('userDropdown').classList.toggle('show');
-        document.getElementById('notificationDropdown').classList.remove('show');
-    }
-    function markAsRead(el, id) {
-        el.classList.remove('unread');
-        const badge = document.getElementById('notifBadge');
-        if (badge) {
-            let c = parseInt(badge.textContent);
-            if (c > 0) { c--; badge.textContent = c; }
-            if (c === 0) badge.style.display = 'none';
-        }
-        // Tandai ke server via fetch
-        fetch('{{ route("peminjam.notif.read") }}', {
-            method: 'PATCH',
-            headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
-            body: JSON.stringify({ id })
-        });
-    }
-    function markAllAsRead() {
-        document.querySelectorAll('.notification-item.unread').forEach(i => i.classList.remove('unread'));
-        const badge = document.getElementById('notifBadge');
-        if (badge) { badge.textContent = '0'; badge.style.display = 'none'; }
-        fetch('{{ route("peminjam.notif.readAll") }}', {
-            method: 'PATCH',
-            headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' }
-        });
-    }
-    document.addEventListener('click', function(e) {
-        if (!e.target.closest('[onclick="toggleNotification()"]') && !e.target.closest('#notificationDropdown'))
-            document.getElementById('notificationDropdown')?.classList.remove('show');
-        if (!e.target.closest('[onclick="toggleUserDropdown()"]') && !e.target.closest('#userDropdown'))
-            document.getElementById('userDropdown')?.classList.remove('show');
-        if (window.innerWidth <= 768) {
-            const s = document.getElementById('sidebar');
-            if (!s?.contains(e.target) && !e.target.closest('[onclick="toggleSidebar()"]')) {
-                s?.classList.remove('show');
-                document.getElementById('overlay')?.classList.add('hidden');
-                document.getElementById('overlay')?.classList.remove('block');
+    const dropdown = document.getElementById('notificationDropdown');
+    const userDropdown = document.getElementById('userDropdown');
+    
+    dropdown.classList.toggle('show');
+    if (userDropdown) userDropdown.classList.remove('show');
+}
+
+function toggleUserDropdown() {
+    const userDropdown = document.getElementById('userDropdown');
+    const notifDropdown = document.getElementById('notificationDropdown');
+    
+    userDropdown.classList.toggle('show');
+    if (notifDropdown) notifDropdown.classList.remove('show');
+}
+
+function markAsRead(el, id) {
+    // Hapus class unread
+    el.classList.remove('unread');
+    
+    // Update badge
+    const badge = document.getElementById('notifBadge');
+    if (badge && badge.style.display !== 'none') {
+        let currentCount = parseInt(badge.textContent);
+        if (!isNaN(currentCount) && currentCount > 0) {
+            currentCount--;
+            if (currentCount === 0) {
+                badge.style.display = 'none';
+            } else {
+                badge.textContent = currentCount;
             }
         }
+    }
+    
+    // Kirim ke server
+    fetch('/peminjam/notifikasi/' + id + '/read', {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+        }
+    }).catch(err => console.error('Error:', err));
+}
+
+function markAllAsRead() {
+    // Hapus semua class unread
+    document.querySelectorAll('.notification-item.unread').forEach(item => {
+        item.classList.remove('unread');
     });
+    
+    // Sembunyikan badge
+    const badge = document.getElementById('notifBadge');
+    if (badge) {
+        badge.style.display = 'none';
+        badge.textContent = '0';
+    }
+    
+    // Kirim ke server
+    fetch('{{ route("peminjam.notif.readAll") }}', {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+        }
+    }).catch(err => console.error('Error:', err));
+}
+
+// Close dropdowns when clicking outside
+document.addEventListener('click', function(e) {
+    const notifDropdown = document.getElementById('notificationDropdown');
+    const userDropdown = document.getElementById('userDropdown');
+    const notifBtn = e.target.closest('[onclick="toggleNotification()"]');
+    const userBtn = e.target.closest('[onclick="toggleUserDropdown()"]');
+    
+    if (!notifBtn && notifDropdown && !notifDropdown.contains(e.target)) {
+        notifDropdown.classList.remove('show');
+    }
+    
+    if (!userBtn && userDropdown && !userDropdown.contains(e.target)) {
+        userDropdown.classList.remove('show');
+    }
+    
+    // Mobile sidebar close
+    if (window.innerWidth <= 768) {
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('overlay');
+        if (!e.target.closest('[onclick="toggleSidebar()"]') && 
+            !sidebar?.contains(e.target) && 
+            sidebar?.classList.contains('show')) {
+            sidebar.classList.remove('show');
+            if (overlay) {
+                overlay.classList.add('hidden');
+                overlay.classList.remove('block');
+            }
+        }
+    }
+});
     function showToast(msg, type='') {
         const t = document.getElementById('toast');
         t.innerHTML = type === 'success'

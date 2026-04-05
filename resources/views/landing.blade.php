@@ -231,7 +231,7 @@
                 $features = [
                     ['icon'=>'fas fa-mobile-alt','color'=>'text-[#3b82f6]','bg'=>'bg-[#dbeafe]','title'=>'Akses Multi-Device','desc'=>'Gunakan di HP, tablet, atau laptop. Interface responsif yang nyaman di semua ukuran layar.'],
                     ['icon'=>'fas fa-bell','color'=>'text-[#f59e0b]','bg'=>'bg-[#fef3c7]','title'=>'Notifikasi Real-Time','desc'=>'Peminjam dan admin menerima notifikasi otomatis saat pengajuan, persetujuan, atau jatuh tempo.'],
-                    ['icon'=>'fas fa-shield-alt','color'=>'text-[#10b981]','bg'=>'bg-[#d1fae5]','title'=>'Multi-Role Aman','desc'=>'Tiga level akses: Admin, Peminjam, dan Manajemen. Setiap role punya kontrol yang tepat.'],
+                    ['icon'=>'fas fa-shield-alt','color'=>'text-[#10b981]','bg'=>'bg-[#d1fae5]','title'=>'Multi-Role Aman','desc'=>'Dua level akses: Admin dan Peminjam. Setiap role punya kontrol yang tepat.'],
                     ['icon'=>'fas fa-money-bill-wave','color'=>'text-[#ef4444]','bg'=>'bg-[#fecaca]','title'=>'Manajemen Denda','desc'=>'Sistem denda otomatis untuk keterlambatan. Transparent dan mudah dilacak oleh semua pihak.'],
                     ['icon'=>'fas fa-chart-bar','color'=>'text-[#7c3aed]','bg'=>'bg-[#e9d5ff]','title'=>'Laporan & Analitik','desc'=>'Rekap transaksi lengkap dengan export PDF. Pantau penggunaan aset secara akurat.'],
                     ['icon'=>'fas fa-clock','color'=>'text-[#0ea5e9]','bg'=>'bg-[#e0f2fe]','title'=>'Riwayat Lengkap','desc'=>'Semua aktivitas tercatat rapi. Mudah lacak siapa meminjam apa dan kapan dikembalikan.'],
@@ -286,15 +286,14 @@
     <section class="py-16 bg-gradient-to-br from-[#1d4ed8] to-[#3b82f6]">
         <div class="max-w-6xl mx-auto px-4 sm:px-6">
             <div class="text-center mb-12 reveal">
-                <h2 class="text-2xl sm:text-3xl font-bold text-white mb-3">Tiga Role, Satu Platform</h2>
-                <p class="text-white/80 text-sm max-w-lg mx-auto">Nexora mendukung tiga jenis pengguna dengan tampilan dan akses yang disesuaikan.</p>
+                <h2 class="text-2xl sm:text-3xl font-bold text-white mb-3">Dua Role, Satu Platform</h2>
+                <p class="text-white/80 text-sm max-w-lg mx-auto">Nexora mendukung dua jenis pengguna dengan tampilan dan akses yang disesuaikan.</p>
             </div>
-            <div class="grid md:grid-cols-3 gap-5">
+            <div class="grid md:grid-cols-2 gap-5">
                 @php
                 $roles = [
                     ['icon'=>'fas fa-user-tie','title'=>'Admin','color'=>'border-yellow-300','badge'=>'bg-yellow-300 text-yellow-900','items'=>['Kelola data user & aset','Setujui / tolak peminjaman','Monitor semua transaksi','Atur tarif denda','Export laporan PDF']],
                     ['icon'=>'fas fa-user-graduate','title'=>'Peminjam','color'=>'border-green-300','badge'=>'bg-green-300 text-green-900','items'=>['Cari & ajukan peminjaman','Lihat status pengajuan','Riwayat peminjaman pribadi','Terima notifikasi real-time','Lihat tagihan denda']],
-                    ['icon'=>'fas fa-user-cog','title'=>'Manajemen','color'=>'border-blue-200','badge'=>'bg-blue-200 text-blue-900','items'=>['Monitor semua aset','Lihat laporan rekap','Verifikasi pengembalian','Akses data statistik','Cetak laporan periode']],
                 ];
                 @endphp
                 @foreach($roles as $r)

@@ -44,16 +44,15 @@
     </h3>
     <div class="guide-step">
         <h4><span class="step-num">1</span> Pilih Aset di Data Aset</h4>
-        <p>Buka menu <strong>Data Aset</strong>. Di setiap kartu aset tersedia 3 pilihan:</p>
+        <p>Buka menu <strong>Data Aset</strong>. Di setiap kartu aset tersedia 2 pilihan:</p>
         <ul>
-            <li><strong class="text-blue-600">Sekarang</strong> — Pinjam 1 aset langsung (redirect ke form peminjaman)</li>
             <li><strong class="text-green-600">+Keranjang</strong> — Tambah ke keranjang untuk meminjam beberapa aset sekaligus</li>
             <li><strong class="text-gray-600">Detail</strong> — Lihat informasi lengkap aset</li>
         </ul>
     </div>
     <div class="guide-step">
         <h4><span class="step-num">2</span> Proses di Keranjang</h4>
-        <p>Jika memilih <strong>+Keranjang</strong>, aset akan masuk ke keranjang. Klik icon <i class="fas fa-shopping-cart text-green-600"></i> di navbar untuk masuk ke halaman <strong>Transaksi Peminjaman</strong>.</p>
+        <p>Jika memilih <strong>+Keranjang</strong>, aset akan masuk ke keranjang. sistem secara otomatis akan menampilkan Panel Keranjang Belanja di sisi layar Anda untuk masuk ke halaman <strong>Transaksi Peminjaman</strong>.</p>
     </div>
     <div class="guide-step">
         <h4><span class="step-num">3</span> Isi Form Peminjaman</h4>

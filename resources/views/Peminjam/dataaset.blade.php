@@ -129,10 +129,6 @@
             </button>
             @else
             <div class="flex gap-2">
-                <button class="flex-1 py-2 bg-blue-500 text-white rounded-lg text-xs sm:text-sm font-semibold hover:bg-blue-600 hover:-translate-y-0.5 hover:shadow-md transition-all flex items-center justify-center gap-1"
-                    onclick="pinjamSekarang({{ $aset->id }}, '{{ addslashes($aset->nama_aset) }}', {{ $tersedia }}, this)">
-                    <i class="fas fa-bolt"></i> Sekarang
-                </button>
                 <button class="flex-1 py-2 bg-green-500 text-white rounded-lg text-xs sm:text-sm font-semibold hover:bg-green-600 hover:-translate-y-0.5 hover:shadow-md transition-all flex items-center justify-center gap-1"
                     id="btn-{{ $aset->id }}"
                     onclick="addToCart('{{ $aset->id }}', '{{ $aset->nama_aset }}', {{ $tersedia }}, '{{ $aset->foto }}', this)">
@@ -199,36 +195,66 @@
 
 @push('scripts')
 <script>
+    // 1. Inisialisasi Data Awal
     let cart = JSON.parse(localStorage.getItem('nexora_cart')) || [];
     let activeCat = 'all';
     let currentDetailCard = null;
 
+    // 2. Fungsi Update Badge & UI Keranjang (Agar angka berubah otomatis)
     function updateCartUI() {
         const n = cart.length;
-        document.getElementById('cartCount').textContent = n;
-        document.getElementById('cartFloatCount').textContent = n;
-        document.getElementById('cartFloat').classList.toggle('show', n > 0);
+        const badge = document.getElementById('cartCount');
+        const floatBadge = document.getElementById('cartFloatCount');
+        const cartFloat = document.getElementById('cartFloat');
+
+        if (badge) badge.textContent = n;
+        if (floatBadge) floatBadge.textContent = n;
+        if (cartFloat) cartFloat.classList.toggle('show', n > 0);
+        
+        // Panggil juga fungsi update badge global (jika ada di layout)
+        if(typeof updateCartBadge === "function") updateCartBadge();
     }
 
-    function pinjamSekarang(id, name, stok, btn) {
-        if (stok === 0) { showToast('Stok habis!', 'error'); return; }
-        showToast('Mengarahkan ke halaman peminjaman...', 'success');
-        setTimeout(() => { location.href = '{{ route("peminjam.peminjaman") }}?aset=' + id; }, 1000);
-    }
-
+    // 3. Fungsi Tambah ke Keranjang
     function addToCart(id, name, stok, foto, btn) {
-        if (stok === 0) { showToast('Stok habis!', 'error'); return; }
-        if (cart.find(i => i.id === id)) { showToast('Sudah ada di keranjang!', 'error'); return; }
+        if (cart.find(item => item.id == id)) {
+            alert('Aset ini sudah ada di keranjang!');
+            return;
+        }
+
+        // Simpan ke array cart
         cart.push({ id, name, stok, foto, jumlah: 1 });
         localStorage.setItem('nexora_cart', JSON.stringify(cart));
+
+        // Perubahan Visual Tombol (Lampu mati/Abu-abu)
+        if (btn) {
+            btn.innerHTML = '<i class="fas fa-check mr-1"></i> Di Keranjang';
+            btn.classList.remove('bg-blue-600', 'hover:bg-blue-700', 'bg-green-500'); 
+            btn.classList.add('bg-gray-400', 'cursor-not-allowed');
+            btn.disabled = true;
+        }
+
         updateCartUI();
-        btn.innerHTML = '<i class="fas fa-check"></i> +Keranjang';
-        btn.classList.remove('bg-green-500', 'hover:bg-green-600');
-        btn.classList.add('bg-green-600', 'hover:bg-green-700');
-        btn.disabled = true;
-        showToast(name + ' ditambahkan ke keranjang!', 'success');
+        showToast('Berhasil ditambah ke keranjang!', 'success');
     }
 
+    // 4. Fungsi Scan Tombol saat Refresh (Agar tetap abu-abu)
+    function updateButtonStates() {
+        let currentCart = JSON.parse(localStorage.getItem('nexora_cart')) || [];
+        currentCart.forEach(item => {
+            // Cari tombol menggunakan ID yang lebih spesifik
+            const btn = document.getElementById('btn-' + item.id) || 
+                        document.querySelector(`button[onclick*="'${item.id}'"]`);
+            if (btn) {
+                btn.innerHTML = '<i class="fas fa-check mr-1"></i> Di Keranjang';
+                btn.classList.add('bg-gray-400', 'cursor-not-allowed');
+                btn.classList.remove('bg-blue-600', 'bg-green-500');
+                btn.disabled = true;
+            }
+        });
+    }
+
+    // 5. Filter & Search
     function applyFilter() {
         const q = document.getElementById('searchInput').value.toLowerCase();
         let visible = 0;
@@ -240,60 +266,71 @@
             if (show) visible++;
         });
         const nf = document.getElementById('notFound');
-        nf.classList.toggle('hidden', visible > 0);
-        document.getElementById('notFoundMsg').textContent = q ? `Aset "${q}" tidak ditemukan` : 'Data tidak ditemukan';
+        if (nf) nf.classList.toggle('hidden', visible > 0);
+        const nfMsg = document.getElementById('notFoundMsg');
+        if (nfMsg) nfMsg.textContent = q ? `Aset "${q}" tidak ditemukan` : 'Data tidak ditemukan';
     }
 
     function filterCat(cat, btn) {
         activeCat = cat;
         document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
+        if (btn) btn.classList.add('active');
         applyFilter();
     }
 
+    // 6. Modal Detail Aset
     function openDetail(btn) {
         currentDetailCard = btn;
         const card = btn.closest('[data-cat]');
         const img  = card.querySelector('img');
+        
         document.getElementById('detailImg').src = img ? img.src : '';
         document.getElementById('detailNama').textContent    = card.dataset.name;
         document.getElementById('detailKat').textContent     = card.dataset.cat;
         document.getElementById('detailKondisi').textContent = card.dataset.kondisi;
+        
         const stok = parseInt(card.dataset.stok);
         document.getElementById('detailStok').textContent = stok > 0 ? stok + ' unit' : 'Habis';
         document.getElementById('detailDesk').textContent = card.dataset.desk;
-        const pBtn      = document.getElementById('detailPinjamBtn');
-        const cartBtn   = document.getElementById('btn-' + card.dataset.id);
+        
+        const pBtn = document.getElementById('detailPinjamBtn');
+        const id   = card.dataset.id;
+        
+        // Cek apakah barang sudah ada di cart
+        const isAlreadyInCart = cart.find(item => item.id == id);
+
         if (stok === 0) {
-            pBtn.innerHTML = '<i class="fas fa-ban"></i> Stok Habis'; pBtn.disabled = true;
-        } else if (cartBtn && cartBtn.disabled) {
-            pBtn.innerHTML = '<i class="fas fa-check"></i> Di Keranjang'; pBtn.disabled = true;
+            pBtn.innerHTML = '<i class="fas fa-ban"></i> Stok Habis'; 
+            pBtn.disabled = true;
+            pBtn.classList.add('bg-gray-400');
+        } else if (isAlreadyInCart) {
+            pBtn.innerHTML = '<i class="fas fa-check"></i> Di Keranjang'; 
+            pBtn.disabled = true;
+            pBtn.classList.add('bg-gray-400');
         } else {
-            pBtn.innerHTML = '<i class="fas fa-cart-plus"></i> Tambah'; pBtn.disabled = false;
+            pBtn.innerHTML = '<i class="fas fa-cart-plus"></i> Tambah ke Keranjang'; 
+            pBtn.disabled = false;
+            pBtn.onclick = function() {
+                const mainBtn = document.getElementById('btn-' + id);
+                addToCart(id, card.dataset.name, stok, (img ? img.src : ''), mainBtn);
+                closeModal('modalDetail');
+            };
+            pBtn.classList.remove('bg-gray-400');
         }
         openModal('modalDetail');
     }
 
-    function addFromDetail() {
-        if (!currentDetailCard) return;
-        const card    = currentDetailCard.closest('[data-cat]');
-        const cartBtn = document.getElementById('btn-' + card.dataset.id);
-        if (cartBtn && !cartBtn.disabled) cartBtn.click();
-        closeDetail();
-    }
-
-    function closeDetail() { closeModal('modalDetail'); }
-
-    // Restore cart state
-    cart.forEach(item => {
-        const btn = document.getElementById('btn-' + item.id);
-        if (btn) {
-            btn.innerHTML = '<i class="fas fa-check"></i> +Keranjang';
-            btn.classList.remove('bg-green-500','hover:bg-green-600');
-            btn.classList.add('bg-green-600','hover:bg-green-700');
-            btn.disabled = true;
+    // 7. EKSEKUSI SAAT PAGE LOAD
+    document.addEventListener('DOMContentLoaded', function() {
+        updateButtonStates();
+        updateCartUI();
+        
+        // Event listener search
+        const sInput = document.getElementById('searchInput');
+        if (sInput) {
+            sInput.addEventListener('input', applyFilter);
         }
     });
-    updateCartUI();
+
 </script>
 @endpush

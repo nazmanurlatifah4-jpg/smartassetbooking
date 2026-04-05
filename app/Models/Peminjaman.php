@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Carbon;
 
 class Peminjaman extends Model
 {
@@ -14,6 +15,7 @@ class Peminjaman extends Model
     protected $fillable = [
         'user_id', 
         'aset_id', 
+        'jumlah',
         'admin_id', // Pastikan kolom ini ada di database jika pakai relasi admin
         'tanggal_pinjam',    
         'tanggal_pengajuan', 
@@ -26,10 +28,10 @@ class Peminjaman extends Model
 
     // SATU BLOK CASTS SAJA UNTUK SEMUA TANGGAL
     protected $casts = [
-        'tanggal_pinjam'    => 'date',
-        'tanggal_pengajuan' => 'date',
-        'tanggal_disetujui' => 'date',
-        'tanggal_kembali'   => 'date',
+        'tanggal_pinjam'    => 'datetime',
+        'tanggal_pengajuan' => 'datetime',
+        'tanggal_disetujui' => 'datetime',
+        'tanggal_kembali'   => 'datetime',
     ];
 
     // --- Relasi ---
@@ -61,14 +63,17 @@ class Peminjaman extends Model
     // --- Helpers ---
 
     public function isTerlambat() {
-        // Cek apakah sudah melewati tanggal kembali dan belum selesai
-        if (!$this->tanggal_kembali || $this->status === 'Selesai') return false;
-        return $this->tanggal_kembali->isPast();
+        if (!$this->tanggal_kembali) return false;
+        /** @var Carbon $tgl */
+        $tgl = $this->tanggal_kembali;
+        return $tgl->isPast();
     }
     
     // Hitung berapa hari terlambat
     public function getHariTerlambatAttribute() {
         if (!$this->isTerlambat()) return 0;
-        return $this->tanggal_kembali->diffInDays(now());
+        /** @var Carbon $tgl */
+        $tgl = $this->tanggal_kembali;
+        return $tgl->diffInDays(Carbon::now());
     }
 }

@@ -114,7 +114,10 @@
                             <div class="text-xs font-medium text-[#1e293b]">{{ $p->user->nama }}</div>
                             <div class="text-[10px] text-[#94a3b8]">{{ $p->user->jurusan ?? '-' }}</div>
                         </td>
-                        <td class="p-3 text-xs text-[#475569] border-b border-[#f1f5f9] hidden sm:table-cell">{{ $p->aset->nama_aset }}</td>
+                        <td class="p-3 text-xs text-[#475569] border-b border-[#f1f5f9] hidden sm:table-cell">
+                            {{ $p->aset->nama_aset }}
+                            <span class="text-[10px] ml-1 bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded font-bold">{{ $p->jumlah }}x</span>
+                        </td>
                         <td class="p-3 text-xs text-[#475569] border-b border-[#f1f5f9] hidden md:table-cell">{{ \Carbon\Carbon::parse($p->tanggal_pinjam)->format('d M Y') }}</td>
                         <td class="p-3 text-xs border-b border-[#f1f5f9] hidden md:table-cell {{ $p->isTerlambat() ? 'text-[#ef4444] font-semibold' : 'text-[#475569]' }}">
                             {{ \Carbon\Carbon::parse($p->tanggal_kembali_rencana)->format('d M Y') }}
@@ -129,24 +132,19 @@
                                     class="w-7 h-7 rounded-md bg-[#dbeafe] text-[#3b82f6] hover:bg-[#3b82f6] hover:text-white transition-all flex items-center justify-center text-xs" title="Detail">
                                     <i class="fas fa-eye"></i>
                                 </a>
-                                @if($p->status === 'menunggu')
+                                @if(strtolower($p->status) === 'menunggu')
                                 <form method="POST" action="{{ route('admin.transaksi.approve', $p) }}" class="inline">
                                     @csrf
                                     <button type="submit" class="w-7 h-7 rounded-md bg-[#d1fae5] text-[#10b981] hover:bg-[#10b981] hover:text-white transition-all flex items-center justify-center text-xs" title="Setujui">
                                         <i class="fas fa-check"></i>
                                     </button>
                                 </form>
-                                <button onclick="openTolakModal({{ $p->id }})"
+                                <button onclick="openTolakModal('{{ $p->id }}')"
                                     class="w-7 h-7 rounded-md bg-[#fee2e2] text-[#ef4444] hover:bg-[#ef4444] hover:text-white transition-all flex items-center justify-center text-xs" title="Tolak">
                                     <i class="fas fa-times"></i>
                                 </button>
                                 @endif
-                                @if(in_array($p->status, ['disetujui','dipinjam','terlambat']))
-                                <button onclick="openKembaliModal({{ $p->id }})"
-                                    class="w-7 h-7 rounded-md bg-[#e0e7ff] text-[#3730a3] hover:bg-[#3730a3] hover:text-white transition-all flex items-center justify-center text-xs" title="Konfirmasi Kembali">
-                                    <i class="fas fa-undo"></i>
-                                </button>
-                                @endif
+                                {{-- Button Undo dihapus sesuai request --}}
                                 @if(in_array($p->status, ['selesai','ditolak']))
                                 <form method="POST" action="{{ route('admin.transaksi.destroy', $p) }}" class="inline"
                                     onsubmit="return confirm('Yakin hapus data ini?')">
@@ -210,9 +208,13 @@
                     <input type="date" name="tanggal_pinjam" class="field-input" value="{{ date('Y-m-d') }}" required>
                 </div>
                 <div>
-                    <label class="field-label">Tanggal Kembali</label>
-                    <input type="date" name="tanggal_kembali" class="field-input" required>
+                    <label class="field-label">Jumlah</label>
+                    <input type="number" name="jumlah" class="field-input" min="1" value="1" required>
                 </div>
+            </div>
+            <div>
+                <label class="field-label">Tanggal Kembali</label>
+                <input type="date" name="tanggal_kembali" class="field-input" required>
             </div>
             <div>
                 <label class="field-label">Keperluan</label>

@@ -3,10 +3,12 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Peminjaman;
 use App\Models\Denda;
 use App\Models\Notifikasi;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Carbon;
 
 class DendaController extends Controller
 {
@@ -33,12 +35,18 @@ class DendaController extends Controller
 
         $dendas = $query->latest()->paginate(15);
 
+        // Hitung peminjaman yang terlambat tapi belum dikembalikan (Belum ada record denda)
+        $peminjamanTerlambat = Peminjaman::whereIn('status', ['Disetujui', 'Dipinjam'])
+            ->where('tanggal_kembali', '<', Carbon::now()->toDateString())
+            ->count();
+
         // Stats — pakai kolom migration: status_bayar, total_denda
         $stats = [
             'aktif'           => Denda::where('status_bayar', 'Belum Lunas')->count(),
             'total_nominal'   => Denda::where('status_bayar', 'Belum Lunas')->sum('total_denda'),
             'sudah_bayar'     => Denda::where('status_bayar', 'Lunas')->count(),
             'total_terkumpul' => Denda::where('status_bayar', 'Lunas')->sum('total_denda'),
+            'terlambat_count' => $peminjamanTerlambat,
         ];
 
         return view('admin.denda', compact('dendas', 'stats'));

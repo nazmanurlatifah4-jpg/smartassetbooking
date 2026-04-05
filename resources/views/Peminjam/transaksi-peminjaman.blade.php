@@ -143,147 +143,139 @@
 
 @push('scripts')
 <script>
+    // 1. Ambil data keranjang dari memori browser
     let cart = JSON.parse(localStorage.getItem('nexora_cart')) || [];
 
+    // Fungsi format tanggal (opsional)
     function formatTgl(str) {
         if (!str) return '-';
         const d = new Date(str);
         return d.toLocaleDateString('id-ID', { day:'2-digit', month:'short', year:'numeric' });
     }
 
+    // 2. FUNGSI MENAMPILKAN KERANJANG
     function renderCart() {
-    const container = document.getElementById('cartItemsContainer');
-    const emptyMsg  = document.getElementById('emptyCartMsg');
-    const dateFields= document.getElementById('dateFields');
-    const actionBtn = document.getElementById('actionButtons');
+        const container = document.getElementById('cartItemsContainer');
+        const emptyMsg  = document.getElementById('emptyCartMsg');
+        const dateFields= document.getElementById('dateFields');
+        const actionBtn = document.getElementById('actionButtons');
 
-    if (cart.length === 0) {
-        container.innerHTML = '';
-        emptyMsg.classList.remove('hidden');
-        dateFields.classList.add('hidden');
-        actionBtn.classList.add('hidden');
-        return;
+        if (cart.length === 0) {
+            container.innerHTML = '';
+            emptyMsg.classList.remove('hidden');
+            dateFields.classList.add('hidden');
+            actionBtn.classList.add('hidden');
+            return;
+        }
+
+        emptyMsg.classList.add('hidden');
+        dateFields.classList.remove('hidden');
+        actionBtn.classList.remove('hidden');
+
+        let html = '';
+        cart.forEach((item, idx) => {
+            html += `
+            <div class="flex items-center gap-3 p-3 bg-[#f8fafc] rounded-xl mb-2 border border-[#e2e8f0]">
+                <div class="w-12 h-12 rounded-xl bg-[#dbeafe] overflow-hidden flex-shrink-0 border border-[#e2e8f0]">
+                    <img src="${item.foto ? '/storage/' + item.foto : 'https://ui-avatars.com/api/?name=' + item.name}" 
+                         class="w-full h-full object-cover" 
+                         onerror="this.src='https://ui-avatars.com/api/?name=${item.name}&background=dbeafe&color=3b82f6'">
+                </div>
+
+                <div class="flex-1 min-w-0">
+                    <p class="text-sm font-semibold text-[#1e293b] truncate">${item.name}</p>
+                    <p class="text-[10px] text-[#64748b]">Stok tersedia: ${item.stok}</p>
+                </div>
+                
+                <div class="flex items-center gap-2">
+                    <button type="button" onclick="changeQty(${idx}, -1)" class="w-8 h-8 rounded-lg bg-white border border-[#e2e8f0] flex items-center justify-center text-sm font-bold shadow-sm active:scale-95">-</button>
+                    <input type="number" id="qty-input-${idx}" class="w-12 text-center border-none bg-transparent font-bold text-sm" value="${item.jumlah}" readonly>
+                    <button type="button" onclick="changeQty(${idx}, 1)" class="w-8 h-8 rounded-lg bg-white border border-[#e2e8f0] flex items-center justify-center text-sm font-bold shadow-sm active:scale-95">+</button>
+                </div>
+
+                <button type="button" onclick="removeFromCart(${idx})" class="w-8 h-8 rounded-lg bg-red-50 text-red-500 flex items-center justify-center ml-2">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>`;
+        });
+        
+        container.innerHTML = html;
     }
 
-    emptyMsg.classList.add('hidden');
-    dateFields.classList.remove('hidden');
-    actionBtn.classList.remove('hidden');
-
-    let html = '';
-    cart.forEach((item, idx) => {
-        // PERHATIKAN BAGIAN FOTO DI BAWAH INI
-        html += `
-        <div class="flex items-center gap-3 p-3 bg-[#f8fafc] rounded-xl mb-2 border border-[#e2e8f0]">
-            
-            <div class="w-12 h-12 rounded-xl bg-[#dbeafe] overflow-hidden flex-shrink-0 border border-[#e2e8f0]">
-                <img src="${item.foto ? '/storage/' + item.foto : 'https://ui-avatars.com/api/?name=' + item.name + '&background=dbeafe&color=3b82f6'}" 
-                     class="w-full h-full object-cover" 
-                     alt="${item.name}"
-                     onerror="this.src='https://ui-avatars.com/api/?name=${item.name}&background=dbeafe&color=3b82f6'">
-            </div>
-
-            <div class="flex-1 min-w-0">
-                <p class="text-sm font-semibold text-[#1e293b] truncate">${item.name}</p>
-                <p class="text-[10px] text-[#64748b]">Stok tersedia: ${item.stok}</p>
-            </div>
-            
-            <div class="flex items-center gap-2">
-    <button type="button" 
-            onclick="changeQty(${idx}, -1)" 
-            class="w-8 h-8 rounded-lg bg-white border border-[#e2e8f0] text-gray-600 hover:bg-gray-100 flex items-center justify-center text-sm font-bold shadow-sm transition-all active:scale-95">
-        -
-    </button>
-    
-    <input type="number" 
-           id="qty-input-${idx}" 
-           class="qty-input w-12 text-center border-none bg-transparent font-bold text-sm" 
-           value="${item.jumlah}" 
-           readonly>
-    
-    <button type="button" 
-            onclick="changeQty(${idx}, 1)" 
-            class="w-8 h-8 rounded-lg bg-white border border-[#e2e8f0] text-gray-600 hover:bg-gray-100 flex items-center justify-center text-sm font-bold shadow-sm transition-all active:scale-95">
-        +
-    </button>
-</div>
-
-<button type="button" 
-        onclick="removeFromCart(${idx})" 
-        class="w-8 h-8 rounded-lg bg-red-50 text-red-500 hover:bg-red-100 flex items-center justify-center ml-2 transition-colors active:scale-90">
-    <i class="fas fa-times"></i>
-</button>
-    });
-    container.innerHTML = html;
-}
-
+    // 3. FUNGSI UBAH JUMLAH (SINKRON KE STOK)
     function changeQty(idx, delta) {
-    let currentQty = parseInt(cart[idx].jumlah) || 1;
-    let newQty = currentQty + delta;
-    
-    if (newQty >= 1 && newQty <= cart[idx].stok) {
-        cart[idx].jumlah = newQty;
+        let currentQty = parseInt(cart[idx].jumlah) || 1;
+        let newQty = currentQty + delta;
+        
+        if (newQty >= 1 && newQty <= cart[idx].stok) {
+            cart[idx].jumlah = newQty;
+            localStorage.setItem('nexora_cart', JSON.stringify(cart));
+            
+            // Update angka di layar tanpa reload
+            const inputEl = document.getElementById(`qty-input-${idx}`);
+            if (inputEl) { inputEl.value = newQty; }
+        } else if (newQty > cart[idx].stok) {
+            alert('Stok tidak mencukupi, Boss!');
+        }
+    }
+
+    // 4. FUNGSI HAPUS DARI KERANJANG
+    function removeFromCart(idx) {
+    if(confirm('Hapus aset ini dari daftar?')) {
+        // 1. Hapus item dari array berdasarkan index
+        cart.splice(idx, 1);
+        
+        // 2. Simpan perubahan ke localStorage
         localStorage.setItem('nexora_cart', JSON.stringify(cart));
         
-        // UPDATE LANGSUNG KE LAYAR (INI KUNCINYA)
-        const inputEl = document.getElementById(`qty-input-${idx}`);
-        if (inputEl) {
-            inputEl.value = newQty;
+        // 3. JALANKAN ULANG RENDER (Ini yang bikin Real-time)
+        renderCart(); 
+        
+        // 4. Update angka di icon keranjang (Badge)
+        if(typeof updateCartBadge === "function") {
+            updateCartBadge();
         }
-    } else if (newQty > cart[idx].stok) {
-        alert('Stok tidak mencukupi!');
+
+        showToast('Aset berhasil dihapus', 'info');
     }
 }
 
-    function setQty(idx, val) {
-        cart[idx].jumlah = Math.max(1, Math.min(cart[idx].stok, parseInt(val) || 1));
-        localStorage.setItem('nexora_cart', JSON.stringify(cart));
-        renderCart(); 
-    }
-
-    function removeFromCart(idx) {
-        if(confirm('Hapus aset ini dari daftar?')) {
-            cart.splice(idx, 1);
-            localStorage.setItem('nexora_cart', JSON.stringify(cart));
-            renderCart();
-        }
-    }
-
-    function validateDurasi() {
-        const p = document.getElementById('tglPinjam').value;
-        const k = document.getElementById('tglKembali').value;
-        const info = document.getElementById('durasiInfo');
-        if (p && k) {
-            const diff = Math.round((new Date(k) - new Date(p)) / 86400000);
-            if (diff < 0) { info.textContent = '⚠ Tanggal kembali tidak valid'; info.className = 'text-xs text-red-500 mt-1'; }
-            else if (diff > 7) { info.textContent = '⚠ Maksimal 7 hari peminjaman'; info.className = 'text-xs text-red-500 mt-1'; }
-            else { info.textContent = `✓ Durasi: ${diff} hari`; info.className = 'text-xs text-green-600 mt-1'; }
-        }
-    }
-
+    // 5. FUNGSI KIRIM KE CONTROLLER (PROSES STOK)
     function submitPeminjaman() {
         const tglP   = document.getElementById('tglPinjam').value;
         const tglK   = document.getElementById('tglKembali').value;
         const tujuan = document.getElementById('tujuan').value.trim();
 
-        if (!tglP || !tglK)   { alert('Isi tanggal pinjam dan kembali!'); return; }
-        if (!tujuan)           { alert('Isi tujuan peminjaman!'); return; }
-        if (cart.length === 0) { alert('Keranjang kosong!'); return; }
+        if (!tglP || !tglK || !tujuan) { 
+            alert('Lengkapi tanggal dan tujuan peminjaman dulu ya!'); 
+            return; 
+        }
+        
+        if (cart.length === 0) { 
+            alert('Keranjangnya masih kosong nih!'); 
+            return; 
+        }
 
-        const diff = Math.round((new Date(tglK) - new Date(tglP)) / 86400000);
-        if (diff < 0 || diff > 7) { alert('Durasi peminjaman harus 1–7 hari!'); return; }
-
+        // Bikin form bayangan untuk kirim data ke Laravel
         const form = document.createElement('form');
         form.method = 'POST';
         form.action = '{{ route("peminjam.peminjaman.store") }}';
-        form.innerHTML = `<input type="hidden" name="_token" value="{{ csrf_token() }}">
-            <input type="hidden" name="tanggal_pengajuan" value="${tglP}">
-            <input type="hidden" name="tanggal_kembali" value="${tglK}">
-            <input type="hidden" name="keperluan" value="${tujuan}">
-            <input type="hidden" name="cart" value='${JSON.stringify(cart)}'>`;
+        // Cari bagian ini di script Blade kamu:
+form.innerHTML = `
+    <input type="hidden" name="_token" value="{{ csrf_token() }}">
+    <input type="hidden" name="tanggal_pengajuan" value="${tglP}">
+    <input type="hidden" name="tanggal_kembali" value="${tglK}">
+    <input type="hidden" name="keperluan" value="${tujuan}">
+    <input type="hidden" name="cart" value='${JSON.stringify(cart)}'>`; 
         document.body.appendChild(form);
+        
+        // Bersihkan keranjang di browser sebelum pindah halaman
+        localStorage.removeItem('nexora_cart');
+        
         form.submit();
     }
 
+    // Jalankan render otomatis pas halaman dibuka
     renderCart();
 </script>
 @endpush

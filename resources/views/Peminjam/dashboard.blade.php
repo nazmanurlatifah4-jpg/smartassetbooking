@@ -4,6 +4,18 @@
 
 @section('content')
 
+@if($stats['terlambat'] > 0)
+<div class="bg-[#fef3c7] border border-[#fde68a] rounded-xl p-4 mb-6 flex items-start gap-3 animate-pulse">
+    <div class="w-8 h-8 rounded-full bg-[#fde68a] flex items-center justify-center text-[#d97706] flex-shrink-0 mt-0.5">
+        <i class="fas fa-exclamation-triangle text-sm"></i>
+    </div>
+    <div>
+        <p class="text-sm font-semibold text-[#92400e]">Peringatan: Kamu memiliki {{ $stats['terlambat'] }} pinjaman yang terlambat!</p>
+        <p class="text-xs text-[#b45309] mt-0.5">Segera kembalikan aset ke perpustakaan/lab agar denda tidak terus bertambah.</p>
+    </div>
+</div>
+@endif
+
 {{-- Greeting Card --}}
 <div class="bg-gradient-to-br from-[#3b82f6] to-[#2563eb] rounded-xl md:rounded-2xl p-6 md:p-8 text-white mb-6 relative overflow-hidden">
     <div class="flex flex-col items-center text-center">

@@ -42,7 +42,7 @@
             <div class="absolute bottom-[-20px] right-[-20px] w-36 h-36 rounded-full bg-white/10"></div>
             <div class="absolute top-1/2 left-[-15px] w-12 h-12 rounded-full bg-white/5"></div>
 
-            <img src="{{ asset('assets/logo-dashboard-admin.png') }}" alt="Login Illustration"
+            <img src="{{ asset('assets/icon-login1.png') }}" alt="Login Illustration"
                 class="w-1/2 md:w-[45%] h-auto object-contain mb-6 md:mb-8 mx-auto drop-shadow-xl animate-float z-10">
 
             <div class="text-center text-white z-10 animate-float-delay">

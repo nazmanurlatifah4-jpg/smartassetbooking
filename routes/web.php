@@ -36,6 +36,8 @@ Route::middleware(['auth', 'role:admin'])
     ->name('admin.')
     ->group(function () {
 
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('admin.dashboard');
+
     // Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
@@ -67,6 +69,8 @@ Route::middleware(['auth', 'role:admin'])
     Route::put   ('/denda/settings',     [DendaController::class, 'updateSettings'])->name('denda.settings');
     Route::put   ('/denda/{denda}',      [DendaController::class, 'update']         )->name('denda.update');
     Route::delete('/denda/{denda}',      [DendaController::class, 'destroy']        )->name('denda.destroy');
+    
+    
 
    // Pastikan ini berada di dalam group yang memiliki prefix 'admin'
 Route::get   ('/laporan',             [LaporanController::class, 'index']     )->name('laporan');
@@ -79,6 +83,11 @@ Route::delete('/laporan/{laporan}',   [LaporanController::class, 'destroy']   )-
 Route::post  ('/laporan/quick-export',      [LaporanController::class, 'quickExport'])->name('laporan.quick-export');
 Route::get   ('/laporan/{laporan}/export',  [LaporanController::class, 'exportPdf'] )->name('laporan.export');
 Route::get   ('/laporan/{laporan}/preview', [LaporanController::class, 'previewPdf'])->name('laporan.preview');
+
+// Notifikasi
+    Route::patch('/notif/read',       [PeminjamController::class, 'notifRead']   )->name('notif.read');
+    Route::patch('/notif/read-all',   [PeminjamController::class, 'notifReadAll'])->name('notif.readAll');
+
 });
 
 
@@ -89,6 +98,8 @@ Route::middleware(['auth', 'role:peminjam'])
     ->prefix('peminjam')
     ->name('peminjam.')
     ->group(function () {
+
+    Route::get('/dashboard', [PeminjamController::class, 'index'])->name('peminjam.dashboard');
 
     // Dashboard
     Route::get('/dashboard', [PeminjamController::class, 'dashboard'])->name('dashboard');

@@ -68,39 +68,48 @@
 </div>
 
 {{-- ===== FILTER PREVIEW ===== --}}
-<div class="bg-white rounded-xl p-4 shadow-sm border border-[#e2e8f0] mb-5 no-print">
-    <form method="GET" action="{{ route('admin.laporan') }}" class="flex flex-col sm:flex-row gap-3 items-end">
-        <div class="flex-1">
-            <label class="fl">Bulan</label>
-            <select name="bulan" class="fi">
+<div class="bg-white rounded-2xl p-5 shadow-sm border border-[#e2e8f0] mb-6 no-print">
+    <form method="GET" action="{{ route('admin.laporan') }}" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 items-end">
+        {{-- Input Bulan --}}
+        <div class="w-full">
+            <label class="block text-[10px] font-bold text-[#64748b] uppercase tracking-wider mb-1.5 ml-1">Bulan</label>
+            <select name="bulan" class="w-full bg-[#f8fafc] border border-[#e2e8f0] rounded-xl px-4 py-2.5 text-sm font-medium text-[#1e293b] focus:ring-2 focus:ring-[#3b82f6] focus:border-transparent outline-none transition-all cursor-pointer hover:bg-white">
                 @foreach($bulanNames as $idx => $bName)
-                <option value="{{ $idx + 1 }}" {{ (int)$bulan === $idx+1 ? 'selected' : '' }}>{{ $bName }}</option>
+                    <option value="{{ $idx + 1 }}" {{ (int)$bulan === $idx+1 ? 'selected' : '' }}>{{ $bName }}</option>
                 @endforeach
             </select>
         </div>
-        <div class="flex-1">
-            <label class="fl">Tahun</label>
-            <select name="tahun" class="fi">
+
+        {{-- Input Tahun --}}
+        <div class="w-full">
+            <label class="block text-[10px] font-bold text-[#64748b] uppercase tracking-wider mb-1.5 ml-1">Tahun</label>
+            <select name="tahun" class="w-full bg-[#f8fafc] border border-[#e2e8f0] rounded-xl px-4 py-2.5 text-sm font-medium text-[#1e293b] focus:ring-2 focus:ring-[#3b82f6] focus:border-transparent outline-none transition-all cursor-pointer hover:bg-white">
                 @foreach($tahunOptions as $t)
-                <option value="{{ $t }}" {{ (int)$tahun === $t ? 'selected' : '' }}>{{ $t }}</option>
+                    <option value="{{ $t }}" {{ (int)$tahun === $t ? 'selected' : '' }}>{{ $t }}</option>
                 @endforeach
             </select>
         </div>
-        <div class="flex-1">
-            <label class="fl">Tampilkan</label>
-            <select name="filter" class="fi">
-                <option value="semua"  {{ $filter==='semua'  ? 'selected':'' }}>Semua Transaksi</option>
-                <option value="aktif"  {{ $filter==='aktif'  ? 'selected':'' }}>Aktif (Disetujui)</option>
-                <option value="selesai"{{ $filter==='selesai'? 'selected':'' }}>Selesai</option>
-                <option value="denda"  {{ $filter==='denda'  ? 'selected':'' }}>Ada Denda</option>
+
+        {{-- Input Status --}}
+        <div class="w-full">
+            <label class="block text-[10px] font-bold text-[#64748b] uppercase tracking-wider mb-1.5 ml-1">Filter Status</label>
+            <select name="filter" class="w-full bg-[#f8fafc] border border-[#e2e8f0] rounded-xl px-4 py-2.5 text-sm font-medium text-[#1e293b] focus:ring-2 focus:ring-[#3b82f6] focus:border-transparent outline-none transition-all cursor-pointer hover:bg-white">
+                <option value="semua"   {{ $filter==='semua'   ? 'selected':'' }}>Semua Transaksi</option>
+                <option value="aktif"   {{ $filter==='aktif'   ? 'selected':'' }}>Aktif (Disetujui)</option>
+                <option value="selesai" {{ $filter==='selesai' ? 'selected':'' }}>Selesai</option>
+                <option value="denda"   {{ $filter==='denda'   ? 'selected':'' }}>Ada Denda</option>
             </select>
         </div>
-        <button type="submit" class="px-5 py-2.5 bg-[#3b82f6] text-white rounded-lg text-sm font-semibold hover:bg-[#2563eb] transition-colors flex items-center gap-2 whitespace-nowrap">
-            <i class="fas fa-filter"></i> Tampilkan
-        </button>
+
+        {{-- Tombol Submit --}}
+        <div class="w-full">
+            <button type="submit" class="w-full bg-[#3b82f6] hover:bg-[#2563eb] text-white font-bold py-2.5 rounded-xl text-sm shadow-md shadow-blue-100 hover:shadow-lg transition-all flex items-center justify-center gap-2 border border-transparent active:scale-[0.98]">
+                <i class="fas fa-filter text-xs"></i> 
+                <span>Tampilkan</span>
+            </button>
+        </div>
     </form>
 </div>
-
 {{-- ===== SUMMARY STATS ===== --}}
 <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
     @php

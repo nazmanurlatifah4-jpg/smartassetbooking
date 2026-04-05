@@ -16,11 +16,14 @@ class Aset extends Model
 
     public function stokTersedia()
     {
-        // Menghitung berapa banyak aset ini yang statusnya sedang 'Disetujui' (sedang dipinjam)
-        $dipinjam = $this->peminjaman()->where('status', 'Disetujui')->count();
+        // Hitung semua aset yang sedang diproses atau dipinjam
+        // Karena 'jumlah' sekarang sudah dicatat di database
+        $dipinjam = $this->peminjaman()
+            ->whereIn('status', ['Menunggu', 'Disetujui', 'Terlambat'])
+            ->sum('jumlah');
         
-        // Stok tersedia adalah stok awal dikurangi yang sedang keluar
-        return $this->stok - $dipinjam;
+        // Stok tersedia adalah stok total DB dikurangi yang sedang aktif dipinjam
+        return max(0, $this->stok - $dipinjam);
     }
 
     public function peminjaman(): HasMany

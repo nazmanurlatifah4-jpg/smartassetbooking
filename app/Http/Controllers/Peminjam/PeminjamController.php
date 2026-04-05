@@ -9,6 +9,7 @@ use App\Models\Peminjaman;
 use App\Models\Pengembalian;
 use App\Models\Notifikasi;
 use App\Models\Denda;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 
@@ -25,8 +26,8 @@ class PeminjamController extends Controller
             'aktif'     => Peminjaman::where('user_id', $user->id)->where('status', 'Disetujui')->count(),
             'diproses'  => Peminjaman::where('user_id', $user->id)->where('status', 'Menunggu')->count(),
             'terlambat' => Peminjaman::where('user_id', $user->id)
-                            ->where('status', 'Disetujui')
-                            ->where('tanggal_kembali', '<', now()->toDateString())
+                            ->whereIn('status', ['Disetujui', 'Dipinjam']) // Status aktif
+                            ->where('tanggal_kembali', '<', Carbon::now()->toDateString())
                             ->count(),
             'selesai'   => Peminjaman::where('user_id', $user->id)->where('status', 'Selesai')->count(),
             'total'     => Peminjaman::where('user_id', $user->id)->count(),
@@ -59,56 +60,76 @@ class PeminjamController extends Controller
 
     // ── TRANSAKSI PEMINJAMAN - Store ──────────────────────────────
     public function peminjamanStore(Request $request)
-    {
-        $request->validate([
-            'tanggal_pengajuan' => ['required', 'date'],
-            'tanggal_kembali'   => ['required', 'date', 'after_or_equal:tanggal_pengajuan'],
-            'keperluan'         => ['nullable', 'string', 'max:500'],
-            'cart'              => ['required', 'string'], // JSON dari localStorage
-        ]);
+{   
+    $pinjamanAktif = Peminjaman::where('user_id', auth()->id())
+        ->whereIn('status', ['Menunggu', 'Disetujui', 'Terlambat']) // Status yang dianggap belum selesai
+        ->exists();
 
-        $cart = json_decode($request->cart, true);
+    if ($pinjamanAktif) {
+        return redirect()->back()->with('error', 'Gagal! Kamu masih memiliki pinjaman yang belum dikembalikan. Selesaikan dulu pinjaman sebelumnya ya!');
+    }
 
-        if (empty($cart)) {
-            return redirect()->route('peminjam.peminjaman')
-                ->with('error', 'Keranjang kosong!');
-        }
+    $request->validate([
+        'tanggal_pengajuan' => ['required', 'date'],
+        'tanggal_kembali'   => ['required', 'date', 'after_or_equal:tanggal_pengajuan'],
+        'keperluan'         => ['nullable', 'string', 'max:500'],
+        'cart'              => ['required', 'string'], // Temanmu pakai nama 'cart'
+    ]);
 
-        // Validasi durasi maksimal 7 hari
-        $diff = \Carbon\Carbon::parse($request->tanggal_pengajuan)
-                    ->diffInDays(\Carbon\Carbon::parse($request->tanggal_kembali));
-        if ($diff > 7) {
-            return redirect()->route('peminjam.peminjaman')
-                ->with('error', 'Maksimal durasi peminjaman adalah 7 hari!');
-        }
+    // AMBIL DATA DARI INPUT 'cart'
+    $cart = json_decode($request->cart, true);
 
+    if (empty($cart)) {
+        return redirect()->back()->with('error', 'Keranjang kosong!');
+    }
+
+    // Validasi durasi maksimal 7 hari
+    $diff = Carbon::parse($request->tanggal_pengajuan)
+                ->diffInDays(Carbon::parse($request->tanggal_kembali));
+    if ($diff > 7) {
+        return redirect()->back()->with('error', 'Maksimal durasi peminjaman adalah 7 hari!');
+    }
+
+    try {
         DB::transaction(function () use ($request, $cart) {
             foreach ($cart as $item) {
                 $aset = Aset::find($item['id']);
-                if (!$aset || $aset->stokTersedia() < 1) continue;
+                
+                if (!$aset || $aset->stok < $item['jumlah']) {
+                    throw new \Exception("Stok aset '{$item['name']}' tidak mencukupi!");
+                }
 
-                // Buat record peminjaman — kolom sesuai migration
-                $peminjaman = Peminjaman::create([
+                // 1. STOK DIBIARKAN UTUH KARENA SUDAH DIKALKULASI OTOMATIS OLEH FUNGSI stokTersedia()
+                // $aset->decrement('stok', $item['jumlah']);
+
+                // 2. BUAT RECORD (Biar muncul di riwayat & admin)
+                Peminjaman::create([
                     'user_id'           => auth()->id(),
                     'aset_id'           => $item['id'],
+                    'jumlah'            => $item['jumlah'],
                     'tanggal_pengajuan' => $request->tanggal_pengajuan,
                     'tanggal_kembali'   => $request->tanggal_kembali,
                     'keperluan'         => $request->keperluan,
-                    'status'            => 'Menunggu', // enum: Menunggu
+                    'status'            => 'Menunggu',
                 ]);
 
-                // Kirim notifikasi ke peminjam
-                Notifikasi::kirim(
-                    auth()->id(),
-                    'Pengajuan Dikirim',
-                    'Pengajuan peminjaman ' . $aset->nama_aset . ' sedang diproses admin.'
-                );
+                // 3. NOTIFIKASI
+                Notifikasi::create([
+                    'user_id' => auth()->id(),
+                    'judul'   => 'Pengajuan Dikirim',
+                    'pesan'   => 'Pengajuan peminjaman ' . $aset->nama_aset . ' sedang diproses.',
+                    'is_read' => false
+                ]);
             }
         });
 
         return redirect()->route('peminjam.riwayat')
-            ->with('success', 'Pengajuan peminjaman berhasil dikirim! Tunggu persetujuan admin.');
+            ->with('success', 'Berhasil! Data sudah masuk ke riwayat dan stok berkurang.');
+
+    } catch (\Exception $e) {
+        return redirect()->back()->with('error', 'Gagal: ' . $e->getMessage());
     }
+}
 
     // ── TRANSAKSI PENGEMBALIAN - Form ─────────────────────────────
     public function pengembalian()
@@ -124,87 +145,66 @@ class PeminjamController extends Controller
 
     // ── TRANSAKSI PENGEMBALIAN - Store ────────────────────────────
     public function pengembalianStore(Request $request)
-    {
-        $request->validate([
-            'peminjaman_id'  => ['required', 'exists:peminjamans,id'],
-            'jumlah'         => ['required', 'integer', 'min:1'],
-            'kondisi_barang' => ['required', Rule::in(['Baik', 'Rusak Ringan', 'Rusak Berat', 'Hilang'])],
-            'foto'           => ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
-            'catatan_admin'  => ['nullable', 'string', 'max:500'],
+{
+    // 1. Ambil data peminjaman dulu untuk validasi 'max' jumlah
+    $peminjaman = Peminjaman::where('id', $request->peminjaman_id)
+    ->where('id', $request->peminjaman_id)
+    ->where('user_id', auth()->id())
+    ->where('status', 'Disetujui')
+    ->firstOrFail();
+
+    if (!$peminjaman) {
+        return redirect()->back()->with('error', 'Data peminjaman tidak ditemukan atau sudah diproses.');
+    }
+
+    $maxJumlah = $peminjaman->jumlah ?? 0;
+
+    // 2. Validasi dengan tambahan limitasi 'max'
+    $request->validate([
+    'peminjaman_id'  => ['required', 'exists:peminjamans,id'],
+    
+    // Gunakan ?? 0 atau ?? 1 agar tidak NULL jika data di DB kosong
+    'jumlah'         => ['required', 'integer', 'min:1', 'max:' . ($peminjaman->jumlah ?? 0)], 
+    
+    'kondisi_barang' => ['required', Rule::in(['Baik', 'Rusak Ringan', 'Rusak Berat', 'Hilang'])],
+    'foto'           => ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
+], [
+    'jumlah.max' => 'Jumlah yang dikembalikan tidak boleh melebihi jumlah pinjam (' . ($peminjaman->jumlah ?? 0) . ' unit).',
+]);
+
+    DB::transaction(function () use ($request, $peminjaman) {
+        // Simpan foto
+        $fotoPath = $request->file('foto')->store('pengembalian', 'public');
+
+        // 3. Buat record pengembalian (Status langsung 'Diterima')
+        Pengembalian::create([
+            'peminjaman_id'       => $peminjaman->id,
+            'tanggal_pengembalian'=> now()->toDateString(),
+            'kondisi_barang'      => $request->kondisi_barang,
+            'foto'                => $fotoPath,
+            'status_verifikasi'   => 'Diterima', // Langsung diterima tanpa nunggu admin
+            'catatan_admin'       => $request->catatan_admin,
         ]);
 
-        // Pastikan peminjaman milik user ini
-        $peminjaman = Peminjaman::where('id', $request->peminjaman_id)
-            ->where('user_id', auth()->id())
-            ->where('status', 'Disetujui')
-            ->firstOrFail();
+        // 4. Update status peminjaman JADI 'Selesai'
+        $peminjaman->update([
+            'status'     => 'Selesai', 
+        ]);
 
-        DB::transaction(function () use ($request, $peminjaman) {
-            // Simpan foto
-            $fotoPath = $request->file('foto')->store('pengembalian', 'public');
+        // 5. STOK TIDAK PERLU DIUBAH SECARA MANUAL, FUNGSI stokTersedia() AKAN OTOMATIS MENYESUAIKAN
+        // $peminjaman->aset->increment('stok', (int)$request->jumlah);
+        // 6. Notifikasi untuk Admin (Opsional, buat info saja)
+        Notifikasi::create([
+            'user_id' => 1, // ID Admin (biasanya 1)
+            'judul'   => 'Aset Dikembalikan',
+            'pesan'   => auth()->user()->name . ' telah mengembalikan ' . $peminjaman->aset->nama_aset,
+            'is_read' => false
+        ]);
+    });
 
-            // Buat record pengembalian
-            $pengembalian = Pengembalian::create([
-                'peminjaman_id'       => $peminjaman->id,
-                'tanggal_pengembalian'=> now()->toDateString(),
-                'kondisi_barang'      => $request->kondisi_barang,
-                'foto'                => $fotoPath,
-                'status_verifikasi'   => 'Menunggu', // enum: Menunggu, Diterima, Ditolak
-                'catatan_admin'       => $request->catatan_admin,
-            ]);
-
-            // Update status peminjaman
-            $peminjaman->update(['status' => 'Selesai']);
-
-            // Cek apakah terlambat → buat denda otomatis
-            if ($peminjaman->isTerlambat()) {
-                $hariTerlambat = $peminjaman->hari_terlambat;
-                $tarifPerHari  = 5000;
-                Denda::create([
-                    'peminjaman_id'   => $peminjaman->id,
-                    'pengembalian_id' => $pengembalian->id,
-                    'jenis_denda'     => 'Telat',
-                    'jumlah_hari'     => $hariTerlambat,
-                    'tarif_per_hari'  => $tarifPerHari,
-                    'total_denda'     => $hariTerlambat * $tarifPerHari,
-                    'status_bayar'    => 'Belum Lunas',
-                ]);
-                Notifikasi::kirim(
-                    auth()->id(),
-                    'Denda Keterlambatan',
-                    'Kamu terlambat ' . $hariTerlambat . ' hari mengembalikan ' . $peminjaman->aset->nama_aset . '. Denda akan diinformasikan admin.'
-                );
-            }
-
-            // Cek kondisi rusak/hilang → buat denda
-            if (in_array($request->kondisi_barang, ['Rusak Berat', 'Hilang'])) {
-                Denda::create([
-                    'peminjaman_id'   => $peminjaman->id,
-                    'pengembalian_id' => $pengembalian->id,
-                    'jenis_denda'     => $request->kondisi_barang === 'Hilang' ? 'Hilang' : 'Rusak Berat',
-                    'jumlah_hari'     => 0,
-                    'tarif_per_hari'  => 0,
-                    'total_denda'     => 0, // nominal ditentukan admin
-                    'status_bayar'    => 'Belum Lunas',
-                    'catatan_admin'   => 'Menunggu penilaian admin — kondisi: ' . $request->kondisi_barang,
-                ]);
-                Notifikasi::kirim(
-                    auth()->id(),
-                    'Laporan Kondisi Aset',
-                    'Kondisi ' . $peminjaman->aset->nama_aset . ' dilaporkan ' . $request->kondisi_barang . '. Admin akan menindaklanjuti.'
-                );
-            } else {
-                Notifikasi::kirim(
-                    auth()->id(),
-                    'Pengembalian Terkirim',
-                    'Pengembalian ' . $peminjaman->aset->nama_aset . ' berhasil dikirim. Menunggu verifikasi admin.'
-                );
-            }
-        });
-
-        return redirect()->route('peminjam.riwayat')
-            ->with('success', 'Pengembalian berhasil dikirim! Admin akan memverifikasi.');
-    }
+    return redirect()->route('peminjam.riwayat')
+        ->with('success', 'Barang berhasil dikembalikan. Stok aset telah diperbarui!');
+}
 
     // ── RIWAYAT ──────────────────────────────────────────────────
     public function riwayat(Request $request)
