@@ -284,4 +284,21 @@ class PeminjamController extends Controller
         ));
     }
 
+    public function notifRead(Request $request)
+    {
+        Notifikasi::where('id', $request->id)
+            ->where('user_id', auth()->id())
+            ->update(['is_read' => true]);
+
+        return response()->json(['success' => true]);
+    }
+
+    public function notifReadAll()
+    {
+        Notifikasi::where('user_id', auth()->id())
+            ->update(['is_read' => true]);
+
+        return back()->with('success', 'Semua notifikasi ditandai sudah baca.');
+    }
+
     }

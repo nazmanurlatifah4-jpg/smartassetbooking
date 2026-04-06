@@ -197,6 +197,7 @@
                 ['route'=>'peminjam.peminjaman',   'icon'=>'fas fa-exchange-alt','label'=>'Transaksi Peminjaman'],
                 ['route'=>'peminjam.pengembalian', 'icon'=>'fas fa-undo',        'label'=>'Transaksi Pengembalian'],
                 ['route'=>'peminjam.riwayat',      'icon'=>'fas fa-history',     'label'=>'Riwayat'],
+                ['route' => 'peminjam.denda',        'icon' => 'fas fa-money-bill-wave','label' => 'Denda'],
                 ['route'=>'peminjam.tentang',      'icon'=>'fas fa-info-circle', 'label'=>'Tentang'],
             ];
             @endphp
@@ -204,8 +205,8 @@
             <li>
                 <a href="{{ route($m['route']) }}"
                 class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all
-                        {{ request()->routeIs($m['route'].'*') ? 'bg-white/15 text-white' : 'text-white/90 hover:bg-white/15 hover:text-white' }}">
-                    <i class="{{ $m['icon'] }} w-5 text-base"></i>
+                {{ request()->routeIs($m['route']) ? 'bg-white/20 text-white font-semibold' : 'text-white/80 hover:bg-white/10 hover:text-white' }}">
+                    <i class="{{ $m['icon'] }} w-5 text-base {{ request()->routeIs($m['route']) ? 'text-white' : 'text-white/70' }}"></i>
                     <span>{{ $m['label'] }}</span>
                 </a>
             </li>

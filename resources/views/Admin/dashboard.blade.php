@@ -67,134 +67,85 @@
                     </tr>
                 </thead>
                 <tbody>
-    @forelse($peminjamanTerbaru as $index => $p)
-    <tr class="hover:bg-[#f8fafc] transition-colors">
-        {{-- Nomor Urut --}}
-        <td class="p-3 text-xs text-[#475569] border-b border-[#f1f5f9]">
-            {{ $index + 1 }}
-        </td>
-        
-        {{-- Nama Peminjam --}}
-        <td class="p-3 text-xs text-[#475569] border-b border-[#f1f5f9] font-medium">
-            {{ $p->user->nama ?? 'User Tidak Ada' }}
-        </td>
-        
-        {{-- Nama Aset --}}
-        <td class="p-3 text-xs text-[#475569] border-b border-[#f1f5f9] hidden sm:table-cell">
-            {{ $p->aset->nama_aset ?? 'Aset Terhapus' }}
-        </td>
-        
-        {{-- Tanggal Pinjam --}}
-        <td class="p-3 text-xs text-[#475569] border-b border-[#f1f5f9] hidden md:table-cell">
-            {{ $p->tanggal_pengajuan->format('d M Y') }}
-        </td>
-        
-        {{-- Status dengan Warna Dinamis --}}
-        <td class="p-3 border-b border-[#f1f5f9]">
-            @php
-                // Logika warna otomatis berdasarkan status
-                $statusClasses = [
-                    'Menunggu' => 'bg-[#fed7aa] text-[#c2410c]',
-                    'Disetujui' => 'bg-[#d1fae5] text-[#065f46]',
-                    'Ditolak'   => 'bg-[#fecaca] text-[#991b1b]',
-                    'Selesai'   => 'bg-[#e0f2fe] text-[#0369a1]',
-                ];
-                $class = $statusClasses[$p->status] ?? 'bg-gray-100 text-gray-600';
-            @endphp
-            <span class="px-2 py-1 rounded-full text-xs font-semibold {{ $class }}">
-                {{ $p->status }}
-            </span>
-        </td>
-        
-        {{-- Tombol Detail --}}
-        <td class="p-3 border-b border-[#f1f5f9]">
-            <button onclick="openModal('detailModal')" class="text-xs text-[#3b82f6] hover:underline flex items-center gap-1">
-                <i class="fas fa-eye"></i> Detail
-            </button>
-        </td>
-    </tr>
-    @empty
-    <tr>
-        <td colspan="6" class="p-5 text-center text-gray-500 text-xs">
-            Belum ada pengajuan peminjaman saat ini.
-        </td>
-    </tr>
-    @endforelse
-</tbody>
+                    @forelse($peminjamanTerbaru as $index => $p)
+                    <tr class="hover:bg-[#f8fafc] transition-colors">
+                        <td class="p-3 text-xs text-[#475569] border-b border-[#f1f5f9]">{{ $index + 1 }}</td>
+                        <td class="p-3 text-xs text-[#475569] border-b border-[#f1f5f9] font-medium">{{ $p->user->nama ?? 'User Tidak Ada' }}</td>
+                        <td class="p-3 text-xs text-[#475569] border-b border-[#f1f5f9] hidden sm:table-cell">{{ $p->aset->nama_aset ?? 'Aset Terhapus' }}</td>
+                        <td class="p-3 text-xs text-[#475569] border-b border-[#f1f5f9] hidden md:table-cell">{{ $p->tanggal_pengajuan->format('d M Y') }}</td>
+                        <td class="p-3 border-b border-[#f1f5f9]">
+                            @php
+                                $statusClasses = [
+                                    'Menunggu' => 'bg-[#fed7aa] text-[#c2410c]',
+                                    'Disetujui' => 'bg-[#d1fae5] text-[#065f46]',
+                                    'Ditolak'   => 'bg-[#fecaca] text-[#991b1b]',
+                                    'Selesai'   => 'bg-[#e0f2fe] text-[#0369a1]',
+                                ];
+                                $class = $statusClasses[$p->status] ?? 'bg-gray-100 text-gray-600';
+                            @endphp
+                            <span class="px-2 py-1 rounded-full text-xs font-semibold {{ $class }}">{{ $p->status }}</span>
+                        </td>
+                        <td class="p-3 border-b border-[#f1f5f9]">
+                            <button onclick="openModal('detailModal-{{ $p->id }}')" class="text-xs text-[#3b82f6] hover:underline flex items-center gap-1">
+                                <i class="fas fa-eye"></i> Detail
+                            </button>
+                        </td>
+                    </tr>
+
+                    {{-- MODAL dinamis per baris --}}
+                    <div id="detailModal-{{ $p->id }}" class="modal-overlay hidden fixed inset-0 bg-black/50 z-[99] flex items-center justify-center" onclick="if(event.target===this)closeModal('detailModal-{{ $p->id }}')">
+                        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 overflow-hidden">
+                            <div class="bg-gradient-to-r from-[#3b82f6] to-[#2563eb] px-6 py-4 flex items-center justify-between">
+                                <h3 class="text-white font-semibold text-base flex items-center gap-2"><i class="fas fa-info-circle"></i> Detail Peminjaman</h3>
+                                <button onclick="closeModal('detailModal-{{ $p->id }}')" class="text-white/80 hover:text-white text-xl leading-none">&times;</button>
+                            </div>
+                            <div class="p-6 space-y-3">
+                                <div class="flex justify-between text-sm border-b border-[#f1f5f9] pb-2">
+                                    <span class="text-[#64748b]">Nama Peminjam</span>
+                                    <span class="font-semibold text-[#1e293b]">{{ $p->user->nama }}</span>
+                                </div>
+                                <div class="flex justify-between text-sm border-b border-[#f1f5f9] pb-2">
+                                    <span class="text-[#64748b]">Nama Aset</span>
+                                    <span class="font-semibold text-[#1e293b]">{{ $p->aset->nama_aset }}</span>
+                                </div>
+                                <div class="flex justify-between text-sm border-b border-[#f1f5f9] pb-2">
+                                    <span class="text-[#64748b]">Tanggal Pinjam</span>
+                                    <span class="font-semibold text-[#1e293b]">{{ $p->tanggal_pengajuan->format('d M Y') }}</span>
+                                </div>
+                                <div class="flex justify-between text-sm pb-2">
+                                    <span class="text-[#64748b]">Status</span>
+                                    <span class="px-2 py-0.5 {{ $class }} rounded-full text-xs font-semibold">{{ $p->status }}</span>
+                                </div>
+
+                                {{-- Form Aksi (hanya jika status Menunggu) --}}
+                                @if($p->status == 'Menunggu')
+                                <div class="flex gap-2 mt-6">
+                                    <form action="{{ route('admin.transaksi.approve', $p->id) }}" method="POST" class="flex-1">
+                                        @csrf
+                                        <button type="submit" class="w-full py-2 rounded-full bg-[#d1fae5] text-[#065f46] text-sm font-semibold hover:bg-[#a7f3d0]">
+                                            Setujui
+                                        </button>
+                                    </form>
+                                    <form action="{{ route('admin.transaksi.reject', $p->id) }}" method="POST" class="flex-1">
+                                        @csrf
+                                        <button type="submit" class="w-full py-2 rounded-full bg-[#fecaca] text-[#991b1b] text-sm font-semibold hover:bg-[#fca5a5]">
+                                            Tolak
+                                        </button>
+                                    </form>
+                                </div>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                    @empty
+                    <tr>
+                        <td colspan="6" class="p-5 text-center text-gray-500 text-xs">Belum ada pengajuan.</td>
+                    </tr>
+                    @endforelse
+                </tbody>
             </table>
         </div>
     </div>
 </div>
 
-{{-- Detail Modal --}}
-<div id="detailModal" class="modal-overlay" onclick="if(event.target===this)closeModal('detailModal')">
-    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 overflow-hidden">
-        <div class="bg-gradient-to-r from-[#3b82f6] to-[#2563eb] px-6 py-4 flex items-center justify-between">
-            <h3 class="text-white font-semibold text-base flex items-center gap-2"><i class="fas fa-info-circle"></i> Detail Peminjaman</h3>
-            <button onclick="closeModal('detailModal')" class="text-white/80 hover:text-white text-xl leading-none">&times;</button>
-        </div>
-        <div class="p-6 space-y-3">
-            <div class="flex justify-between text-sm border-b border-[#f1f5f9] pb-2">
-                <span class="text-[#64748b]">Nama Peminjam</span>
-                <span class="font-semibold text-[#1e293b]">Budi Santoso</span>
-            </div>
-            <div class="flex justify-between text-sm border-b border-[#f1f5f9] pb-2">
-                <span class="text-[#64748b]">Nama Aset</span>
-                <span class="font-semibold text-[#1e293b]">Laptop Lenovo</span>
-            </div>
-            <div class="flex justify-between text-sm border-b border-[#f1f5f9] pb-2">
-                <span class="text-[#64748b]">Tanggal Pinjam</span>
-                <span class="font-semibold text-[#1e293b]">07 Feb 2026</span>
-            </div>
-            <div class="flex justify-between text-sm border-b border-[#f1f5f9] pb-2">
-                <span class="text-[#64748b]">Tanggal Kembali</span>
-                <span class="font-semibold text-[#1e293b]">10 Feb 2026</span>
-            </div>
-            <div class="flex justify-between text-sm pb-2">
-                <span class="text-[#64748b]">Status</span>
-                <span class="px-2 py-0.5 bg-[#fed7aa] text-[#c2410c] rounded-full text-xs font-semibold">Menunggu</span>
-            </div>
-        </div>
-
-        <div class="flex gap-2 mt-4">
-    <form action="{{ route('admin.transaksi.approve', $p->id) }}" method="POST" class="flex-1">
-        @csrf
-        <button type="submit" onclick="return confirm('Setujui peminjaman ini?')" 
-            class="w-full bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg font-semibold transition-all shadow-sm">
-        <div class="px-6 pb-5 flex gap-2">
-    <form action="{{ route('admin.transaksi.approve', $p->id) }}" method="POST" class="flex-1">
-        @csrf
-        <button type="submit" class="w-full py-2 rounded-full bg-[#d1fae5] text-[#065f46] text-sm font-semibold hover:bg-[#a7f3d0] transition-colors">
-            <i class="fas fa-check mr-1"></i> Setujui
-        </button>
-    </form>
-
-
-    <form action="{{ route('admin.transaksi.reject', $p->id) }}" method="POST">
-    @csrf
-    <div class="flex flex-col gap-2">
-        <textarea name="catatan" placeholder="Alasan ditolak..." class="text-xs p-2 border rounded-md"></textarea>
-        
-        <button type="submit" onclick="return confirm('Yakin ingin menolak peminjaman ini?')" 
-            class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg font-semibold transition-all">
-            <i class="fas fa-times mr-1"></i> Tolak Peminjaman
-        </button>
-    </div>
-</form>
-
-    <form action="{{ route('admin.transaksi.reject', $p->id) }}" method="POST" class="flex-1">
-        @csrf
-        <button type="submit" class="w-full py-2 rounded-full bg-[#fecaca] text-[#991b1b] text-sm font-semibold hover:bg-[#fca5a5] transition-colors">
-            <i class="fas fa-times mr-1"></i> Tolak
-        </button>
-    </form>
-
-    <button type="button" onclick="closeModal('detailModal')" class="px-4 py-2 rounded-full bg-[#f1f5f9] text-[#64748b] text-sm font-semibold hover:bg-[#e2e8f0] transition-colors">
-        Tutup
-    </button>
->>>>>>> 629c3b93746c4db7dc4d99dd101f6be6e3ca02f2
-</div>
-    </div>
-</div>
-
-@endsection
+@endsection 
