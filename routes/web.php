@@ -11,7 +11,6 @@ use App\Http\Controllers\Admin\AsetController;
 use App\Http\Controllers\Admin\TransaksiController;
 use App\Http\Controllers\Admin\DendaController;
 use App\Http\Controllers\Admin\LaporanController;
-use App\Http\Controllers\Admin\KategoriController;
 use App\Http\Controllers\Peminjam\PeminjamController;
 
 // ─────────────────────────────────────────────────────────────────
@@ -54,11 +53,6 @@ Route::middleware(['auth', 'role:admin'])
     Route::post  ('/aset',         [AsetController::class, 'store']  )->name('aset.store');
     Route::put   ('/aset/{aset}', [AsetController::class, 'update'] )->name('aset.update');
     Route::delete('/aset/{aset}', [AsetController::class, 'destroy'])->name('aset.destroy');
-
-    // Kategori CRUD
-    Route::post  ('/kategori',             [KategoriController::class, 'store']   )->name('kategori.store');
-    Route::put   ('/kategori/{kategori}',   [KategoriController::class, 'update']  )->name('kategori.update');
-    Route::delete('/kategori/{kategori}',   [KategoriController::class, 'destroy'] )->name('kategori.destroy');
 
     // Transaksi
     Route::get   ('/transaksi',                          [TransaksiController::class, 'index']           )->name('transaksi');

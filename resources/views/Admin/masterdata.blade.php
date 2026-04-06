@@ -33,7 +33,6 @@
 <div class="flex gap-2 mb-4 bg-white p-1.5 rounded-xl shadow-sm border border-[#e2e8f0] w-fit">
     <button class="tab active" onclick="switchTab(event,'user')"><i class="fas fa-users mr-1.5"></i>Data User</button>
     <button class="tab" onclick="switchTab(event,'aset')"><i class="fas fa-box mr-1.5"></i>Data Aset</button>
-    <button class="tab" onclick="switchTab(event,'kategori')"><i class="fas fa-list mr-1.5"></i>Data Kategori</button>
 </div>
 
 {{-- ===== TAB USER ===== --}}
@@ -227,55 +226,6 @@
     </div>
 </div>
 
-{{-- ===== TAB KATEGORI ===== --}}
-<div id="tab-kategori" class="tab-content">
-    <div class="bg-white rounded-2xl p-5 md:p-6 shadow-sm border border-[#e2e8f0]">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
-            <h3 class="text-base font-semibold text-[#1e293b] flex items-center gap-2"><i class="fas fa-list text-[#3b82f6]"></i> Daftar Kategori</h3>
-            <div class="flex flex-col sm:flex-row gap-2">
-                <button onclick="openModal('addKategoriModal')"
-                    class="px-4 py-2 bg-gradient-to-r from-[#3b82f6] to-[#2563eb] text-white rounded-lg text-xs font-semibold flex items-center justify-center gap-2">
-                    <i class="fas fa-plus"></i> Tambah Kategori
-                </button>
-            </div>
-        </div>
-        <div class="overflow-x-auto">
-            <table class="min-w-full text-sm">
-                <thead class="bg-[#f8fafc]">
-                    <tr>
-                        <th class="p-3 text-left text-xs font-semibold text-[#64748b] border-b text-center w-12">No</th>
-                        <th class="p-3 text-left text-xs font-semibold text-[#64748b] border-b">Nama Kategori</th>
-                        <th class="p-3 text-left text-xs font-semibold text-[#64748b] border-b">Deskripsi</th>
-                        <th class="p-3 text-left text-xs font-semibold text-[#64748b] border-b text-center">Aksi</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach($kategoris as $k)
-                    <tr class="hover:bg-[#f8fafc]">
-                        <td class="p-3 text-xs text-center border-b">{{ $loop->iteration }}</td>
-                        <td class="p-3 text-xs font-medium border-b">{{ $k->nama }}</td>
-                        <td class="p-3 text-xs text-[#64748b] border-b">{{ $k->deskripsi ?? '-' }}</td>
-                        <td class="p-3 border-b text-center">
-                            <div class="flex justify-center gap-1">
-                                <button onclick="openEditKategoriModal(this, '{{ $k->id }}')" 
-                                    data-nama="{{ $k->nama }}" data-deskripsi="{{ $k->deskripsi }}"
-                                    class="w-7 h-7 rounded-md bg-[#dbeafe] text-[#3b82f6] flex items-center justify-center text-xs">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                                <button onclick="openDeleteModal('kategori', '{{ $k->nama }}', '{{ $k->id }}')"
-                                    class="w-7 h-7 rounded-md bg-[#fee2e2] text-[#ef4444] flex items-center justify-center text-xs">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-                    @endforeach
-                </tbody>
-            </table>
-        </div>
-    </div>
-</div>
-
 {{-- ===== MODALS ===== --}}
 
 {{-- Add User Modal --}}
@@ -422,9 +372,7 @@ function togglePasswordVisibility(inputId, iconId) {
         <div>
             <label class="field-label">Kategori</label>
             <select name="kategori" class="field-input">
-                @foreach($kategoris as $k)
-                    <option value="{{ $k->nama }}">{{ $k->nama }}</option>
-                @endforeach
+                <option>Elektronik</option><option>Fotografi</option><option>Audio</option>
             </select>
         </div>
         <div>
@@ -478,9 +426,9 @@ function togglePasswordVisibility(inputId, iconId) {
                 <div>
                     <label class="field-label">Kategori</label>
                     <select id="editAsetKat" name="kategori" class="field-input">
-                        @foreach($kategoris as $k)
-                            <option value="{{ $k->nama }}">{{ $k->nama }}</option>
-                        @endforeach
+                        <option value="Elektronik">Elektronik</option>
+                        <option value="Fotografi">Fotografi</option>
+                        <option value="Audio">Audio</option>
                     </select>
                 </div>
                 <div>
@@ -509,50 +457,6 @@ function togglePasswordVisibility(inputId, iconId) {
                 <button type="submit" class="flex-1 py-2.5 bg-gradient-to-r from-[#f59e0b] to-[#d97706] text-white rounded-lg text-sm font-semibold">Update Aset</button>
                 <button type="button" onclick="closeModal('editAsetModal')" class="px-4 py-2.5 bg-[#f1f5f9] text-[#64748b] rounded-lg text-sm font-semibold">Batal</button>
             </div>
-        </form>
-    </div>
-</div>
-
-{{-- Add Kategori Modal --}}
-<div id="addKategoriModal" class="modal-overlay" onclick="if(event.target===this)closeModal('addKategoriModal')">
-    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4">
-        <div class="bg-gradient-to-r from-[#3b82f6] to-[#2563eb] px-6 py-4 flex items-center justify-between rounded-t-2xl">
-            <h3 class="text-white font-semibold text-base">Tambah Kategori</h3>
-            <button onclick="closeModal('addKategoriModal')" class="text-white/80 hover:text-white text-xl">&times;</button>
-        </div>
-        <form method="POST" action="{{ route('admin.kategori.store') }}" class="p-6 space-y-4">
-            @csrf
-            <div>
-                <label class="field-label">Nama Kategori</label>
-                <input type="text" name="nama" class="field-input" required>
-            </div>
-            <div>
-                <label class="field-label">Deskripsi</label>
-                <textarea name="deskripsi" class="field-input h-24"></textarea>
-            </div>
-            <button type="submit" class="w-full py-2.5 bg-blue-600 text-white rounded-lg">Simpan Kategori</button>
-        </form>
-    </div>
-</div>
-
-{{-- Edit Kategori Modal --}}
-<div id="editKategoriModal" class="modal-overlay" onclick="if(event.target===this)closeModal('editKategoriModal')">
-    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4">
-        <div class="bg-gradient-to-r from-[#f59e0b] to-[#d97706] px-6 py-4 flex items-center justify-between rounded-t-2xl">
-            <h3 class="text-white font-semibold text-base">Edit Kategori</h3>
-            <button onclick="closeModal('editKategoriModal')" class="text-white/80 hover:text-white text-xl">&times;</button>
-        </div>
-        <form id="editKategoriForm" method="POST" action="" class="p-6 space-y-4">
-            @csrf @method('PUT')
-            <div>
-                <label class="field-label">Nama Kategori</label>
-                <input type="text" id="editKatNama" name="nama" class="field-input" required>
-            </div>
-            <div>
-                <label class="field-label">Deskripsi</label>
-                <textarea id="editKatDesc" name="deskripsi" class="field-input h-24"></textarea>
-            </div>
-            <button type="submit" class="w-full py-2.5 bg-yellow-600 text-white rounded-lg">Update Kategori</button>
         </form>
     </div>
 </div>
@@ -646,27 +550,15 @@ function togglePasswordVisibility(inputId, iconId) {
 
     openModal('editAsetModal');
 }
-    // Logic Edit Kategori
-    function openEditKategoriModal(btn, id) {
-        const modal = document.getElementById('editKategoriModal');
-        const form = document.getElementById('editKategoriForm');
-        let url = "{{ route('admin.kategori.update', ':id') }}";
-        form.action = url.replace(':id', id);
-
-        document.getElementById('editKatNama').value = btn.dataset.nama;
-        document.getElementById('editKatDesc').value = btn.dataset.deskripsi;
-        openModal('editKategoriModal');
-    }
-
     // Logic Delete (Global)
     function openDeleteModal(type, name, id) {
         document.getElementById('deleteTarget').textContent = name;
         const form = document.getElementById('deleteForm');
         
-        let url = "";
-        if (type === 'user') url = "{{ route('admin.users.destroy', ':id') }}";
-        else if (type === 'aset') url = "{{ route('admin.aset.destroy', ':id') }}";
-        else if (type === 'kategori') url = "{{ route('admin.kategori.destroy', ':id') }}";
+        // Tentukan route berdasarkan type (user atau aset)
+        let url = (type === 'user') 
+            ? "{{ route('admin.users.destroy', ':id') }}" 
+            : "{{ route('admin.aset.destroy', ':id') }}";
             
         form.action = url.replace(':id', id);
         openModal('deleteModal');

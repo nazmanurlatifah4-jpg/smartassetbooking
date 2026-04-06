@@ -14,8 +14,11 @@ class MasterdataController extends Controller
         $users = User::latest()->get();
         $asets = Aset::latest()->get();
 
-        // Mengambil kategori dari tabel referensi 'kategoris' yang dikelola di KategoriController
-        $kategoris = Kategori::orderBy('nama')->get();
+        // Daftar kategori unik dari tabel asets (bukan tabel sendiri)
+        $kategoris = Aset::select('kategori')
+            ->distinct()
+            ->orderBy('kategori')
+            ->pluck('kategori');
 
         return view('admin.masterdata', compact('users', 'asets', 'kategoris'));
     }
