@@ -5,23 +5,17 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\Aset;
+use App\Models\Kategori;
 
 class MasterdataController extends Controller
 {
     public function index()
     {
-    // Ambil SEMUA user tanpa filter role agar muncul semua di tabel
-    $users = User::latest()->get();
+        $users = User::latest()->get();
+        $asets = Aset::latest()->get();
 
-    // Ambil semua aset
-    $asets = Aset::latest()->get();
-
-
-        // Daftar kategori unik dari tabel asets (bukan tabel sendiri)
-        $kategoris = Aset::select('kategori')
-            ->distinct()
-            ->orderBy('kategori')
-            ->pluck('kategori');
+        // Mengambil kategori dari tabel referensi 'kategoris' yang dikelola di KategoriController
+        $kategoris = Kategori::orderBy('nama')->get();
 
         return view('admin.masterdata', compact('users', 'asets', 'kategoris'));
     }

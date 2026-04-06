@@ -10,20 +10,17 @@ class Laporan extends Model
 {
     use HasFactory, SoftDeletes;
 
-    /**
-     * Kolom yang dapat diisi secara massal (Mass Assignment).
-     * manajemen_id dan catatan_manajemen dihapus karena role manajemen tidak lagi digunakan.
-     */
+    // Membatasi fillable untuk mencegah manipulasi ID atau Metadata internal secara langsung
     protected $fillable = [
         'admin_id',
         'judul',
         'periode',
         'keterangan',
-        'status', // Isinya nanti antara: 'Draft' atau 'Final'
+        'status', // Status 'Draft' vs 'Final' untuk flow approval/validasi data
     ];
 
     /**
-     * Relasi: Laporan dibuat oleh seorang Admin.
+     * Relasi ke admin pembuat laporan untuk penanggung jawab data (audit trail)
      */
     public function admin()
     {
@@ -31,7 +28,8 @@ class Laporan extends Model
     }
 
     /**
-     * Scope untuk mempermudah filter laporan yang sudah Final di Controller.
+     * Scope ini disediakan agar filter laporan yang sudah siap dipublikasikan (Final) 
+     * menjadi lebih deskriptif dan terpusat di satu tempat.
      */
     public function scopeFinal($query)
     {

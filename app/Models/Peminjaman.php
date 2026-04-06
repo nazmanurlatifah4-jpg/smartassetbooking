@@ -16,7 +16,7 @@ class Peminjaman extends Model
         'user_id', 
         'aset_id', 
         'jumlah',
-        'admin_id', // Pastikan kolom ini ada di database jika pakai relasi admin
+        'admin_id', 
         'tanggal_pinjam',    
         'tanggal_pengajuan', 
         'tanggal_disetujui', 
@@ -26,15 +26,13 @@ class Peminjaman extends Model
         'catatan'
     ];
 
-    // SATU BLOK CASTS SAJA UNTUK SEMUA TANGGAL
+    // Pemusatan casting ke datetime untuk menjamin konsistensi objek Carbon di seluruh aplikasi
     protected $casts = [
         'tanggal_pinjam'    => 'datetime',
         'tanggal_pengajuan' => 'datetime',
         'tanggal_disetujui' => 'datetime',
         'tanggal_kembali'   => 'datetime',
     ];
-
-    // --- Relasi ---
 
     public function user() {
         return $this->belongsTo(User::class, 'user_id');
@@ -60,20 +58,21 @@ class Peminjaman extends Model
         return $this->hasOne(Denda::class);
     }
 
-    // --- Helpers ---
-
+    /**
+     * Memeriksa keterlambatan berdasarkan target tanggal kembali (Business Rule)
+     */
     public function isTerlambat() {
         if (!$this->tanggal_kembali) return false;
-        /** @var Carbon $tgl */
-        $tgl = $this->tanggal_kembali;
-        return $tgl->isPast();
+        
+        return $this->tanggal_kembali->isPast();
     }
     
-    // Hitung berapa hari terlambat
+    /**
+     * Mengkalkulasi selisih hari untuk penentuan besaran denda di tingkat aplikasi
+     */
     public function getHariTerlambatAttribute() {
         if (!$this->isTerlambat()) return 0;
-        /** @var Carbon $tgl */
-        $tgl = $this->tanggal_kembali;
-        return $tgl->diffInDays(Carbon::now());
+        
+        return $this->tanggal_kembali->diffInDays(Carbon::now());
     }
 }

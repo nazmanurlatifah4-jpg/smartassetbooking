@@ -11,25 +11,24 @@ class Aset extends Model
     use SoftDeletes;
 
     protected $fillable = [
-    'kode_aset', 'nama_aset', 'kategori', 'kondisi', 'stok', 'lokasi', 'deskripsi', 'foto'
+        'kode_aset', 'nama_aset', 'kategori', 'kondisi', 'stok', 'lokasi', 'deskripsi', 'foto'
     ];
 
+    /**
+     * Menghitung stok riil yang tersedia dengan mempertimbangkan antrean peminjaman.
+     * Status 'Menunggu' dan 'Disetujui' dianggap mengurangi stok untuk mencegah overbooking.
+     */
     public function stokTersedia()
     {
-        // Hitung semua aset yang sedang diproses atau dipinjam
-        // Karena 'jumlah' sekarang sudah dicatat di database
         $dipinjam = $this->peminjaman()
             ->whereIn('status', ['Menunggu', 'Disetujui', 'Terlambat'])
             ->sum('jumlah');
         
-        // Stok tersedia adalah stok total DB dikurangi yang sedang aktif dipinjam
         return max(0, $this->stok - $dipinjam);
     }
 
     public function peminjaman(): HasMany
-{
-    // Pastikan 'aset_id' adalah nama kolom foreign key di tabel peminjaman kamu
-    return $this->hasMany(Peminjaman::class, 'aset_id', 'id');
-}
-    
+    {
+        return $this->hasMany(Peminjaman::class, 'aset_id', 'id');
+    }
 }
